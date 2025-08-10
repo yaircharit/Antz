@@ -15,8 +15,17 @@ public class FoodGenerator : MonoBehaviour
     [SerializeField] private Vector2 randomAreaMin = new Vector2(-10, -10);
     [SerializeField] private Vector2 randomAreaMax = new Vector2(10, 10);
 
+    private GameObject foodParent; // Parent for all spawned food blocks
+
     void Start()
     {
+        // Create a parent GameObject for all food blocks
+        foodParent = new GameObject("FoodParent");
+        foodParent.transform.SetParent(transform);
+        foodParent.transform.localPosition = Vector3.zero;
+        foodParent.transform.localRotation = Quaternion.identity;
+        foodParent.transform.localScale = Vector3.one;
+
         // Pick a random XZ position in the defined area
         float randX = Random.Range(randomAreaMin.x, randomAreaMax.x);
         float randZ = Random.Range(randomAreaMin.y, randomAreaMax.y);
@@ -48,7 +57,14 @@ public class FoodGenerator : MonoBehaviour
                         // Randomly skip some blocks for the "missing" effect
                         if (Random.value < missingBlockChance) continue;
                         Vector3 pos = center + new Vector3(x * blockSpacing, y * blockSpacing, z * blockSpacing);
+                        // Raycast down to find the ground
+                        RaycastHit hit;
+                        if (Physics.Raycast(pos, Vector3.down, out hit, spawnHeight * 2f, groundMask))
+                        {
+                            pos.y = hit.point.y + 0.5f * blockSpacing; // Place block just above ground
+                        }
                         GameObject appleBlock = Instantiate(appleBlockPrefab, pos, Quaternion.identity);
+                        appleBlock.transform.SetParent(foodParent.transform);
                         Rigidbody rb = appleBlock.GetComponent<Rigidbody>();
                         if (rb == null)
                         {

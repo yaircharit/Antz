@@ -220,6 +220,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7365062815238558919}
   - component: {fileID: 7365062815238558918}
+  - component: {fileID: 5779244861228903171}
   m_Layer: 0
   m_Name: Ant
   m_TagString: Untagged
@@ -237,7 +238,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 25, y: 15, z: 25}
-  m_LocalScale: {x: 1, y: 1.0000002, z: 1.0000002}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7529729078716469613}
@@ -272,6 +273,25 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &5779244861228903171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7365062815238558939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94a5ec308f43aa84ab8dc292ed2a6a61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  followSpeed: 1
+  followDistance: 2
+  detectRadius: 5
+  nestObj: {fileID: 0}
+  foodLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!1 &7827629530827546021
 GameObject:
   m_ObjectHideFlags: 0
