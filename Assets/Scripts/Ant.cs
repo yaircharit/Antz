@@ -6,36 +6,39 @@ public class Ant : MonoBehaviour
 {
     public enum AntState
     {
-        FollowingPlayer,
         SeekingFood,
         CarryingFood
     }
 
+    [Header("Basic Settings")]
     [SerializeField] private float followSpeed = 3f;
-    [SerializeField] private float followDistance = 2f;
     [SerializeField] private float detectRadius = 5f;
     [SerializeField] private GameObject nestObj; // Position of the nest
     [SerializeField] private LayerMask foodLayer; // Layer for food objects
     [SerializeField, Range(0f, 1f)] private float strength = 0f; // 0 = slowest, 1 = no penalty
     [SerializeField] private float carryHeight = 0.75f; // Height above ant to hold food
-    [SerializeField] private Transform headTransform; // Assign the head collider transform in inspector
 
-    private Transform player;
-    private AntState currentState = AntState.FollowingPlayer;
+    [Header("ACO Settings")]
+    [SerializeField] private float pheromoneDepositRate = 1f;
+    [SerializeField] private float pheromoneInfluence = 2f;
+    [SerializeField] private float explorationRate = 0.2f;
+    [SerializeField] private float sampleRadius = 2f;
+    [SerializeField] private int samplePoints = 8;
+
+    private AntState currentState = AntState.SeekingFood;
     private GameObject carriedFood;
     private Transform targetFood;
+    private PheromoneMap pheromoneMap;
+    private List<Vector3> pathHistory = new List<Vector3>();
+    private float lastPheromoneDepositTime;
+    private Vector3 currentWanderDirection = Vector3.forward;
 
     void Start()
     {
-        // Find the player by name
-        GameObject playerObj = GameObject.Find("Player");
-        if (playerObj != null)
+        pheromoneMap = FindObjectOfType<PheromoneMap>();
+        if (pheromoneMap == null)
         {
-            player = playerObj.transform;
-        }
-        else
-        {
-            Debug.LogError("Player not found! Please name the player GameObject as 'Player'.");
+            Debug.LogError("No PheromoneMap found in scene!");
         }
     }
 
@@ -49,16 +52,6 @@ public class Ant : MonoBehaviour
 
         switch (currentState)
         {
-            case AntState.FollowingPlayer:
-                if (targetFood != null)
-                {
-                    currentState = AntState.SeekingFood;
-                }
-                else
-                {
-                    FollowPlayer();
-                }
-                break;
             case AntState.SeekingFood:
                 SeekFood();
                 break;
@@ -74,7 +67,11 @@ public class Ant : MonoBehaviour
             carriedFood.transform.rotation = Quaternion.identity;
         }
 
-        //Debug.Log($"Current State: {currentState}, Target Food: {targetFood?.name ?? "None"}, Carried Food: {carriedFood?.name ?? "None"}");
+        // Record path for pheromone deposit
+        if (currentState == AntState.SeekingFood || currentState == AntState.CarryingFood)
+        {
+            RecordPath();
+        }
     }
 
     void FindNearestFood()
@@ -93,7 +90,6 @@ public class Ant : MonoBehaviour
             }
         }
 
-        // Only update targetFood if not already seeking/carrying
         if (closestFood != null && currentState != AntState.CarryingFood)
         {
             targetFood = closestFood;
@@ -104,51 +100,73 @@ public class Ant : MonoBehaviour
         }
     }
 
-    void FollowPlayer()
-    {
-        if (player == null) return;
-        Vector3 targetPosition = player.position - (player.forward * followDistance);
-        targetPosition.y = 0; // Always stay on the ground
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, followSpeed * Time.deltaTime);
-        
-        // Look at the player, but only rotate around y axis
-        Vector3 lookTarget = new Vector3(player.position.x, 0, player.position.z);
-        Vector3 direction = lookTarget - transform.position;
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            Quaternion lookRotation = Quaternion.LookRotation(direction, Vector3.up);
-            transform.rotation = Quaternion.Euler(0, lookRotation.eulerAngles.y, 0);
-        }
-    }
-
     void SeekFood()
     {
+        Vector3 finalDirection = Vector3.zero;
         if (targetFood == null)
         {
-            currentState = AntState.FollowingPlayer;
-            return;
+            // Wander and follow food pheromone if present, deposit home pheromone
+            Vector3 pheromoneDirection = GetDirectionFromPheromones(Pheromone.PheromoneType.Food);
+            if (pheromoneDirection.sqrMagnitude > 0.01f)
+            {
+                finalDirection = Vector3.Lerp(currentWanderDirection, pheromoneDirection, pheromoneInfluence);
+            }
+            else
+            {
+                // Wander as before
+                float currentPheromoneLevel = pheromoneMap.GetPheromone(transform.position + currentWanderDirection * sampleRadius, Pheromone.PheromoneType.Home);
+                if (currentPheromoneLevel > 0.8f)
+                {
+                    float leftPheromone = pheromoneMap.GetPheromone(transform.position + Quaternion.Euler(0, -90f, 0) * currentWanderDirection * sampleRadius, Pheromone.PheromoneType.Home);
+                    float rightPheromone = pheromoneMap.GetPheromone(transform.position + Quaternion.Euler(0, 90f, 0) * currentWanderDirection * sampleRadius, Pheromone.PheromoneType.Home);
+                    float steerAngle = (leftPheromone > rightPheromone) ? 20f : -20f;
+                    currentWanderDirection = Quaternion.Euler(0, steerAngle, 0) * currentWanderDirection;
+                }
+                else
+                {
+                    currentWanderDirection = Quaternion.Euler(0, Random.Range(-10f, 10f), 0) * currentWanderDirection;
+                }
+                finalDirection = currentWanderDirection;
+            }
+            // Deposit home pheromone while exploring
+            pheromoneMap.AddPheromone(transform.position, pheromoneDepositRate * Time.deltaTime, Pheromone.PheromoneType.Home);
         }
-
-        // Move towards food
-        Vector3 targetPosition = targetFood.position;
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, followSpeed * Time.deltaTime);
-
-        // Look at food
-        Vector3 direction = targetPosition - transform.position;
-        if (direction.sqrMagnitude > 0.001f)
+        else
         {
-            Quaternion lookRotation = Quaternion.LookRotation(direction, Vector3.up);
+            Vector3 targetDirection = (targetFood.position - transform.position).normalized;
+            Vector3 pheromoneDirection = GetDirectionFromPheromones(Pheromone.PheromoneType.Food);
+            if (pheromoneDirection.sqrMagnitude > 0.01f)
+            {
+                finalDirection = Vector3.Lerp(targetDirection, pheromoneDirection, pheromoneInfluence);
+            }
+            else
+            {
+                if (Random.value > explorationRate)
+                {
+                    finalDirection = targetDirection;
+                }
+                else
+                {
+                    finalDirection = Quaternion.Euler(0, Random.Range(-45f, 45f), 0) * targetDirection;
+                }
+            }
+            // Deposit home pheromone while seeking food
+            pheromoneMap.AddPheromone(transform.position, pheromoneDepositRate * Time.deltaTime, Pheromone.PheromoneType.Home);
+        }
+        Vector3 targetPosition = transform.position + finalDirection;
+        targetPosition.y = transform.position.y;
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, followSpeed * Time.deltaTime);
+        if (finalDirection.sqrMagnitude > 0.001f)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(finalDirection, Vector3.up);
             transform.rotation = Quaternion.Euler(0, lookRotation.eulerAngles.y, 0);
         }
-
-        // PickupFood is now handled by OnTriggerEnter
     }
 
     void PickupFood()
     {
         if (targetFood != null)
         {
-            Debug.Log($"Ant picking up food2: {targetFood.name}");
             carriedFood = targetFood.gameObject;
             carriedFood.transform.SetParent(gameObject.transform);
             carriedFood.transform.position = transform.position + Vector3.up * carryHeight;
@@ -160,26 +178,33 @@ public class Ant : MonoBehaviour
 
     void CarryFoodToNest()
     {
-        // Calculate carrying speed with strength modifier
-        float speedFactor = Mathf.Lerp(0.5f, 1f, strength); // 0 strength = 0.5x, 1 strength = 1x
+        float speedFactor = Mathf.Lerp(0.5f, 1f, strength);
         float carryingSpeed = followSpeed * speedFactor;
-
-        // Move towards nest
-        Vector3 targetPosition = nestObj.transform.position;
-        targetPosition.y = 0;
+        // Follow home pheromone trail if present
+        Vector3 homeDirection = GetDirectionFromPheromones(Pheromone.PheromoneType.Home);
+        Vector3 nestDirection = (nestObj.transform.position - transform.position).normalized;
+        Vector3 finalDirection = (homeDirection.sqrMagnitude > 0.01f)
+            ? Vector3.Lerp(nestDirection, homeDirection, pheromoneInfluence)
+            : nestDirection;
+        Vector3 targetPosition = transform.position + finalDirection;
+        targetPosition.y = transform.position.y;
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, carryingSpeed * Time.deltaTime);
-
-        // Look at nest
-        Vector3 direction = targetPosition - transform.position;
-        if (direction.sqrMagnitude > 0.001f)
+        if (finalDirection.sqrMagnitude > 0.001f)
         {
-            Quaternion lookRotation = Quaternion.LookRotation(direction, Vector3.up);
+            Quaternion lookRotation = Quaternion.LookRotation(finalDirection, Vector3.up);
             transform.rotation = Quaternion.Euler(0, lookRotation.eulerAngles.y, 0);
         }
-
-        // Check if we reached the nest
-        if (Vector3.Distance(transform.position, targetPosition) < 0.5f)
+        // Deposit food pheromone while carrying food
+        float distanceToNest = Vector3.Distance(transform.position, nestObj.transform.position);
+        float depositMultiplier = 1f + (1f / (distanceToNest + 1f));
+        pheromoneMap.AddPheromone(transform.position, pheromoneDepositRate * depositMultiplier * Time.deltaTime, Pheromone.PheromoneType.Food);
+        if (Vector3.Distance(transform.position, nestObj.transform.position) < 0.5f)
         {
+            foreach (Vector3 position in pathHistory)
+            {
+                pheromoneMap.AddPheromone(position, pheromoneDepositRate * 2f, Pheromone.PheromoneType.Food);
+            }
+            pathHistory.Clear();
             DropFoodInNest();
         }
     }
@@ -191,13 +216,12 @@ public class Ant : MonoBehaviour
             carriedFood.transform.SetParent(null);
             Destroy(carriedFood); // Food is consumed by the nest
             carriedFood = null;
-            currentState = AntState.FollowingPlayer;
+            currentState = AntState.SeekingFood;
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // Only pickup if seeking food, and the trigger is the head, and the collider is the target food
         if (currentState == AntState.SeekingFood && targetFood != null)
         {            
             if ( other.transform == targetFood)
@@ -209,21 +233,43 @@ public class Ant : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        // Visualize detection radius in editor
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectRadius);
-        
-        // Visualize nest position
         if (nestObj != null)
         {
             Gizmos.color = Color.blue;
             Gizmos.DrawWireSphere(nestObj.transform.position, 1.5f);
         }
-
         if (targetFood != null)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireCube(targetFood.position, Vector3.one);
         }
+    }
+
+    void RecordPath()
+    {
+        if (pathHistory.Count == 0 || Vector3.Distance(pathHistory[pathHistory.Count - 1], transform.position) > 0.5f)
+        {
+            pathHistory.Add(transform.position);
+        }
+    }
+
+    Vector3 GetDirectionFromPheromones(Pheromone.PheromoneType type)
+    {
+        Vector3 pheromoneDirection = Vector3.zero;
+        float maxPheromone = 0.01f;
+        for (int i = 0; i < samplePoints; i++)
+        {
+            float angle = i * (360f / samplePoints);
+            Vector3 samplePoint = transform.position + Quaternion.Euler(0, angle, 0) * Vector3.forward * sampleRadius;
+            float pheromone = pheromoneMap.GetPheromone(samplePoint, type);
+            if (pheromone > maxPheromone)
+            {
+                maxPheromone = pheromone;
+                pheromoneDirection = (samplePoint - transform.position).normalized;
+            }
+        }
+        return pheromoneDirection;
     }
 }

@@ -12,8 +12,8 @@ public class FoodGenerator : MonoBehaviour
     [SerializeField] private float missingBlockChance = 0.15f; // 0.0 = no missing, 1.0 = all missing
     [SerializeField] private LayerMask groundMask = ~0; // Default to everything
     [Header("Random Spawn Area")]
-    [SerializeField] private Vector2 randomAreaMin = new Vector2(-10, -10);
-    [SerializeField] private Vector2 randomAreaMax = new Vector2(10, 10);
+    [SerializeField] private Vector2 spawnAreaCenter = Vector2.zero; // Center point for spawn area
+    [SerializeField] private float spawnRadius = 10f; // Distance from center to edge of spawn area
 
     private GameObject foodParent; // Parent for all spawned food blocks
 
@@ -26,9 +26,9 @@ public class FoodGenerator : MonoBehaviour
         foodParent.transform.localRotation = Quaternion.identity;
         foodParent.transform.localScale = Vector3.one;
 
-        // Pick a random XZ position in the defined area
-        float randX = Random.Range(randomAreaMin.x, randomAreaMax.x);
-        float randZ = Random.Range(randomAreaMin.y, randomAreaMax.y);
+        // Get random position within square defined by center and radius
+        float randX = Random.Range(spawnAreaCenter.x - spawnRadius, spawnAreaCenter.x + spawnRadius);
+        float randZ = Random.Range(spawnAreaCenter.y - spawnRadius, spawnAreaCenter.y + spawnRadius);
         Vector3 groundPos = new Vector3(randX, 0, randZ);
         Vector3 spawnPos = groundPos + Vector3.up * spawnHeight;
         SpawnAppleShape(spawnPos);
