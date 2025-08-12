@@ -2,73 +2,54 @@ using UnityEngine;
 
 public class SeekingFoodState : AntStateBase
 {
-    public SeekingFoodState(Ant ant) : base(ant) { }
+    public SeekingFoodState(Ant ant) : base(ant, PheromoneType.Home) { }
     public override void Enter() { }
     public override void Exit() { }
     public override void Update()
     {
-        ant.FindNearestFood();
-        Vector3 finalDirection = Vector3.zero;
-        if (ant.targetFood == null)
+        Vector3 targetPos;
+
+        if (ant.targetFood != null)
         {
-            Vector3 pheromoneDirection = ant.GetDirectionFromPheromones(Pheromone.PheromoneType.Food);
-            if (pheromoneDirection.sqrMagnitude > 0.01f)
-            {
-                finalDirection = Vector3.Lerp(ant.currentWanderDirection, pheromoneDirection, ant.pheromoneInfluence);
-            }
-            else
-            {
-                float currentPheromoneLevel = ant.pheromoneMap.GetPheromone(ant.transform.position + ant.currentWanderDirection * ant.sampleRadius, Pheromone.PheromoneType.Home);
-                if (currentPheromoneLevel > 0.8f)
-                {
-                    float leftPheromone = ant.pheromoneMap.GetPheromone(ant.transform.position + Quaternion.Euler(0, -90f, 0) * ant.currentWanderDirection * ant.sampleRadius, Pheromone.PheromoneType.Home);
-                    float rightPheromone = ant.pheromoneMap.GetPheromone(ant.transform.position + Quaternion.Euler(0, 90f, 0) * ant.currentWanderDirection * ant.sampleRadius, Pheromone.PheromoneType.Home);
-                    float steerAngle = (leftPheromone > rightPheromone) ? 20f : -20f;
-                    ant.currentWanderDirection = Quaternion.Euler(0, steerAngle, 0) * ant.currentWanderDirection;
-                }
-                else
-                {
-                    ant.currentWanderDirection = Quaternion.Euler(0, Random.Range(-10f, 10f), 0) * ant.currentWanderDirection;
-                }
-                finalDirection = ant.currentWanderDirection;
-            }
-            ant.pheromoneMap.AddPheromone(ant.transform.position, ant.pheromoneDepositRate * Time.deltaTime, Pheromone.PheromoneType.Home);
+            // Found food, move towards it
+            targetPos = ant.targetFood.position;
         }
         else
         {
-            Vector3 targetDirection = (ant.targetFood.position - ant.transform.position).normalized;
-            Vector3 pheromoneDirection = ant.GetDirectionFromPheromones(Pheromone.PheromoneType.Food);
-            if (pheromoneDirection.sqrMagnitude > 0.01f)
+            var phero = ant.GetMinPheromone(PheromoneType.Food);
+
+            if (phero != null)
             {
-                finalDirection = Vector3.Lerp(targetDirection, pheromoneDirection, ant.pheromoneInfluence);
+                // Found a pheromone marker, move towards it
+                targetPos = phero.Position;
             }
             else
             {
-                if (Random.value > ant.explorationRate)
-                {
-                    finalDirection = targetDirection;
-                }
-                else
-                {
-                    finalDirection = Quaternion.Euler(0, Random.Range(-45f, 45f), 0) * targetDirection;
-                }
+                // No pheromone found, wander randomly
+                ant.transform.forward = (Quaternion.Euler(0, Random.Range(-10f, 10f), 0) * ant.transform.forward).normalized;
+                targetPos = ant.transform.position + ant.transform.forward * ant.sampleRadius;
+
+                // TODO: Avoid existing pheromones?
             }
-            ant.pheromoneMap.AddPheromone(ant.transform.position, ant.pheromoneDepositRate * Time.deltaTime, Pheromone.PheromoneType.Home);
         }
-        Vector3 targetPosition = ant.transform.position + finalDirection;
-        targetPosition.y = ant.transform.position.y;
-        ant.transform.position = Vector3.MoveTowards(ant.transform.position, targetPosition, ant.speed * Time.deltaTime);
-        if (finalDirection.sqrMagnitude > 0.001f)
+
+        targetPos.y = ant.transform.position.y;
+
+        ant.transform.forward = (targetPos - ant.transform.position).normalized;
+
+        ant.transform.position = Vector3.MoveTowards(ant.transform.position, targetPos, ant.speed * Time.deltaTime);
+
+        AddPheromone();
+
+        ant.FindNearestFood();
+
+    }
+
+    public override void OnTriggerEnter(Collider other)
+    {
+        if (other.transform == ant.targetFood)
         {
-            Quaternion lookRotation = Quaternion.LookRotation(finalDirection, Vector3.up);
-            ant.transform.rotation = Quaternion.Euler(0, lookRotation.eulerAngles.y, 0);
+            ant.PickupFood();
         }
-        if (ant.carriedFood != null)
-        {
-            Vector3 aboveAnt = ant.transform.position + Vector3.up * ant.carryHeight;
-            ant.carriedFood.transform.position = aboveAnt;
-            ant.carriedFood.transform.rotation = Quaternion.identity;
-        }
-        ant.RecordPath();
     }
 }

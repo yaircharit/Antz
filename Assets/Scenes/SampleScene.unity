@@ -277,7 +277,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.01, y: 1, z: 0.01}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -311,7 +311,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: -0.1, z: 3}
+  m_LocalScale: {x: 3, y: 0.1, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1330862184}
@@ -335,8 +335,8 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5000001
-  m_Height: 2
+  m_Radius: 0.5
+  m_Height: 1
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!23 &518299589
@@ -705,8 +705,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -792,8 +792,8 @@ Transform:
   m_GameObject: {fileID: 1347579501}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.099999994}
-  m_LocalScale: {x: 0.01, y: 1, z: 0.01}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 963194228}
@@ -843,12 +843,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70421956e2c452147abbe7cc3617852b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 200
-  height: 200
-  cellSize: 1
-  evaporationRate: 0.01
   center: {x: 0, y: 0, z: 0}
-  evaporationInterval: 0.2
+  cellSize: 1
+  decayValue: 0.00001
 --- !u!1001 &2044142639
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -879,10 +876,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: detectRadius
-      value: 20
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+      propertyPath: samplePoints
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+      propertyPath: sampleRadius
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+      propertyPath: explorationRate
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+      propertyPath: pheromoneDepositRate
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6926542534303007601, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7365062815238558918, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+      propertyPath: m_Drag
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7365062815238558918, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+      propertyPath: m_Constraints
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 7365062815238558918, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+      propertyPath: m_IsKinematic
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7365062815238558919, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
@@ -891,7 +916,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7365062815238558919, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7365062815238558919, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: m_LocalPosition.z

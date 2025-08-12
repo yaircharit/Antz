@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Ant : MonoBehaviour
@@ -22,8 +20,6 @@ public class Ant : MonoBehaviour
     [HideInInspector] public GameObject carriedFood;
     [HideInInspector] public Transform targetFood;
     [HideInInspector] public PheromoneMap pheromoneMap;
-    [HideInInspector] public List<Vector3> pathHistory = new List<Vector3>();
-    [HideInInspector] public Vector3 currentWanderDirection = Vector3.forward;
 
     private AntStateBase currentState;
     public AntStateBase CurrentState => currentState;
@@ -46,7 +42,6 @@ public class Ant : MonoBehaviour
         {
             // Reset ant position if it falls below a certain height
             transform.position = new Vector3(Random.Range(-10f, 10f), 1f, Random.Range(-10f, 10f));
-            currentWanderDirection = Vector3.forward;
         }
     }
 
@@ -101,19 +96,13 @@ public class Ant : MonoBehaviour
             carriedFood.transform.SetParent(null);
             Destroy(carriedFood);
             carriedFood = null;
-            //ChangeState(new SeekingFoodState(this));
+            ChangeState(new SeekingFoodState(this)); // Uncommenting to change state after dropping food
         }
     }
-
+     
     private void OnTriggerEnter(Collider other)
     {
-        if (currentState is SeekingFoodState && targetFood != null)
-        {
-            if (other.transform == targetFood)
-            {
-                PickupFood();
-            }
-        }
+        currentState?.OnTriggerEnter(other);
     }
 
     void OnDrawGizmosSelected()
@@ -132,29 +121,32 @@ public class Ant : MonoBehaviour
         }
     }
 
-    public void RecordPath()
+    public Pheromone GetMinPheromone(PheromoneType type)
     {
-        if (pathHistory.Count == 0 || Vector3.Distance(pathHistory[pathHistory.Count - 1], transform.position) > 0.5f)
-        {
-            pathHistory.Add(transform.position);
-        }
-    }
-
-    public Vector3 GetDirectionFromPheromones(Pheromone.PheromoneType type)
-    {
-        Vector3 pheromoneDirection = Vector3.zero;
-        float maxPheromone = 0.001f;
+        Pheromone minPheromone = null;
         for (int i = 0; i < samplePoints; i++)
         {
             float angle = i * (360f / samplePoints);
-            Vector3 samplePoint = transform.position + Quaternion.Euler(0, angle, 0) * Vector3.forward * sampleRadius;
-            float pheromone = pheromoneMap.GetPheromone(samplePoint, type);
-            if (pheromone > maxPheromone)
+            Vector3 samplePoint = transform.position + Quaternion.Euler(0, angle, 0) * (Vector3.forward) * sampleRadius;
+            var pheromone = pheromoneMap.GetPheromone(samplePoint, type);
+            if (pheromone != null && pheromone.Position != Vector3Int.FloorToInt(transform.position) && pheromone.Value > 0 && (minPheromone == null || pheromone.Value < minPheromone.Value))
             {
-                maxPheromone = pheromone;
-                pheromoneDirection = (samplePoint - transform.position).normalized;
+                minPheromone = pheromone;
             }
         }
-        return pheromoneDirection;
+        Debug.Log($"{this}, {minPheromone}");
+
+        return minPheromone;
+    }
+
+
+    public void AddPheromone(PheromoneType type)
+    {
+        pheromoneMap.AddPheromone(transform.position, pheromoneDepositRate, type);
+    }
+
+    public override string ToString()
+    {
+        return $"Ant at {transform.position}, {currentState.GetType().Name}";
     }
 }

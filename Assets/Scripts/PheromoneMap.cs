@@ -1,115 +1,135 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
+
+public enum PheromoneType { Food, Home }
 
 public class Pheromone
 {
-    public enum PheromoneType { Food, Home }
     public PheromoneType Type;
     public float Value;
-    public Pheromone(PheromoneType type, float value)
+    public Vector3Int Position;
+
+    private Color color;
+    public Color Color => new(color.r, color.g, color.b, Value);
+
+    public Pheromone(PheromoneType type, float value, Vector3Int position)
     {
         Type = type;
         Value = value;
+        Position = position;
+
+        color = type switch
+        {
+            PheromoneType.Food => new Color(1f, 0f, 0f, 0f),// Red for food
+            PheromoneType.Home => new Color(0f, 0f, 1f, 0f),// Blue for home
+            _ => Color.white,// Default color
+        };
+    }
+
+    public float Decay(float decayFactor)
+    {
+        return Value -= decayFactor;
+    }
+
+    public override string ToString()
+    {
+        return $"Pheromone Type: {Type}, Value: {Value}, Position: {Position}";
     }
 }
 
 public class PheromoneMap : MonoBehaviour
 {
-    public int width = 100;
-    public int height = 100;
-    public float cellSize = 1f;
-    public float evaporationRate = 0.001f;
     public Vector3 center = Vector3.zero;
-    public float evaporationInterval = 0.2f; // Time in seconds between pheromone evaporation updates
 
+    public float cellSize = 1f;
+    public float decayValue = 0.001f;
 
-    private Dictionary<Pheromone.PheromoneType, float[,]> pheromoneGrids;
-    private float evaporationTimer = 0f;
+    private Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>> pheromoneGrids;
 
     void Awake()
     {
-        pheromoneGrids = new Dictionary<Pheromone.PheromoneType, float[,]>();
-        foreach (Pheromone.PheromoneType type in System.Enum.GetValues(typeof(Pheromone.PheromoneType)))
+        pheromoneGrids = new Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>>();
+        foreach (PheromoneType type in System.Enum.GetValues(typeof(PheromoneType)))
         {
-            pheromoneGrids[type] = new float[width, height];
+            pheromoneGrids[type] = new Dictionary<Vector3Int, Pheromone>();
         }
     }
 
-    public Vector2Int WorldToGrid(Vector3 worldPos)
+    public Vector3Int Floor(Vector3 worldPos)
     {
-        // Offset so (0,0) is at the center of the grid
-        Vector3 offset = worldPos - center;
-        int x = Mathf.Clamp(Mathf.FloorToInt(offset.x / cellSize) + width / 2, 0, width - 1);
-        int y = Mathf.Clamp(Mathf.FloorToInt(offset.z / cellSize) + height / 2, 0, height - 1);
-        return new Vector2Int(x, y);
+        return Vector3Int.FloorToInt(worldPos);
     }
 
-    public Vector3 GridToWorld(int x, int y)
+    public void AddPheromone(Vector3 worldPos, float amount, PheromoneType type)
     {
-        // Convert grid coordinates back to world position
-        float wx = (x - width / 2 + 0.5f) * cellSize + center.x;
-        float wz = (y - height / 2 + 0.5f) * cellSize + center.z;
-        return new Vector3(wx, center.y, wz);
+        if (pheromoneGrids[type].TryGetValue(Floor(worldPos), out Pheromone pheromone))
+            pheromone.Value = amount;
+        else
+            pheromoneGrids[type][Floor(worldPos)] = new Pheromone(type, amount, Floor(worldPos));
     }
 
-    public void AddPheromone(Vector3 worldPos, float amount, Pheromone.PheromoneType type)
+    public Pheromone GetPheromone(Vector3 worldPos, PheromoneType type)
     {
-        Vector2Int grid = WorldToGrid(worldPos);
-        pheromoneGrids[type][grid.x, grid.y] += amount;
+        return pheromoneGrids[type].TryGetValue(Floor(worldPos), out Pheromone pheromone) ? pheromone : null;
     }
 
-    public float GetPheromone(Vector3 worldPos, Pheromone.PheromoneType type)
+    public float GetPheromoneValue(Vector3 worldPos, PheromoneType type)
     {
-        Vector2Int grid = WorldToGrid(worldPos);
-        return pheromoneGrids[type][grid.x, grid.y];
+        Pheromone phero = GetPheromone(worldPos, type);
+        return phero != null ? phero.Value : 0f;
     }
+
+    public void RemovePhermone(Pheromone pheromone)
+    {
+        RemovePhermone(pheromone.Position, pheromone.Type);
+    }
+    public void RemovePhermone(Vector3 worldPos, PheromoneType type)
+    {
+        Vector3Int gridPos = Floor(worldPos);
+        if (pheromoneGrids[type].ContainsKey(gridPos))
+        {
+            pheromoneGrids[type].Remove(gridPos);
+        }
+    }
+
 
     public void Evaporate()
     {
+        List<Pheromone> toRemove = new();
         foreach (var grid in pheromoneGrids.Values)
         {
-            for (int x = 0; x < width; x++)
+            foreach (var phero in grid.Values)
             {
-                for (int y = 0; y < height; y++)
+                if (phero.Decay(decayValue) <= 0)
                 {
-                    grid[x, y] *= (1f - evaporationRate);
+                    toRemove.Add(phero);
                 }
             }
         }
+
+        foreach (var pheromone in toRemove)
+        {
+            RemovePhermone(pheromone);
+        }
+        
     }
 
     void Update()
     {
-        evaporationTimer += Time.deltaTime;
-        if (evaporationTimer >= 1f)
-        {
-            Evaporate();
-            evaporationTimer = 0f;
-        }
+        Evaporate();
     }
 
     void OnDrawGizmos()
     {
         if (pheromoneGrids == null) return;
-        for (int x = 0; x < width; x++)
+
+        foreach (var grid in pheromoneGrids.Values)
         {
-            for (int y = 0; y < height; y++)
+            foreach (var phero in grid.Values)
             {
-                float foodLevel = pheromoneGrids[Pheromone.PheromoneType.Food][x, y];
-                float homeLevel = pheromoneGrids[Pheromone.PheromoneType.Home][x, y];
-                Vector3 worldPos = GridToWorld(x, y);
-                if (foodLevel > 0)
-                {
-                    Color color = new Color(1f, 0f, 0f, Mathf.Clamp01(foodLevel)); // Red for food
-                    Gizmos.color = color;
-                    Gizmos.DrawCube(worldPos + new Vector3(0, 0.05f, 0), new Vector3(cellSize * 0.9f, 0.1f, cellSize * 0.9f));
-                }
-                if (homeLevel > 0)
-                {
-                    Color color = new Color(0f, 0f, 1f, Mathf.Clamp01(homeLevel)); // Blue for home
-                    Gizmos.color = color;
-                    Gizmos.DrawCube(worldPos + new Vector3(0, 0.15f, 0), new Vector3(cellSize * 0.7f, 0.1f, cellSize * 0.7f));
-                }
+                Gizmos.color = phero.Color;
+                Gizmos.DrawCube(phero.Position + new Vector3(0, 0.1f, 0), new Vector3(cellSize * 0.9f, 0.1f, cellSize * 0.9f));
             }
         }
     }
