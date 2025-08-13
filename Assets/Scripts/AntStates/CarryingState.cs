@@ -7,6 +7,7 @@ public class CarryingState : AntStateBase
     public override void Enter() {
         ant.Pickup();
         ant.TargetPosition = ant.Colony.NestPos;
+        ant.ResetPheromoneDepositRate();
     }
 
     public override void Exit() {
@@ -19,8 +20,8 @@ public class CarryingState : AntStateBase
 
         if (ant.IsInNest() && ant.CarriedObj != null)
         {
-            ant.ChangeState(new SeekingFoodState(ant));
             ant.Colony.AddFood(ant.CarriedMass);
+            ant.ChangeState(new SeekingFoodState(ant));
             return; 
         }
 
@@ -28,5 +29,5 @@ public class CarryingState : AntStateBase
         ant.AddPheromone(PheromoneType.Food);
     }
 
-   
+
 }

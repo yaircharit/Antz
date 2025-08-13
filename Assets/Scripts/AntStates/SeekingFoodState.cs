@@ -3,10 +3,18 @@ using UnityEngine;
 public class SeekingFoodState : AntStateBase
 {
     public SeekingFoodState(Ant ant) : base(ant) { }
-    public override void Enter() { }
+    public override void Enter() {
+    
+        ant.ResetPheromoneDepositRate();
+    }
     public override void Exit() { }
     public override void Update()
     {
+        if (ant.IsInNest())
+        {
+            ant.ResetPheromoneDepositRate();
+        }
+
         ant.Target = ant.FindNearest(LayerMask.GetMask("Food"));
         ant.Move(PheromoneType.Food);
         ant.AddPheromone(PheromoneType.Home);

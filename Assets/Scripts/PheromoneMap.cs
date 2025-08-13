@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public enum PheromoneType { Food, Home, Danger }
+public enum PheromoneType { Food, Home, Nest, Danger } //TODO: Implement Nest & Danger pheromones logic
 
 public class Pheromone
 {
@@ -42,7 +42,7 @@ public class PheromoneMap : MonoBehaviour
     public static PheromoneMap Instance { get; private set; }
 
     public Vector3 Center { get; private set; } = Vector3.zero; 
-    public float DecayValue { get; private set; } = 0.00005f;
+    public float DecayValue { get; private set; } = 0.00015f;
 
     public float cellSize = 1f;
 
@@ -160,7 +160,7 @@ public class PheromoneMap : MonoBehaviour
             foreach (var phero in grid.Values)
             {
                 Gizmos.color = phero.Color;
-                Gizmos.DrawCube(phero.Position + new Vector3(0, 0.1f, 0), new Vector3(cellSize * 0.9f, 0.1f, cellSize * 0.9f));
+                Gizmos.DrawCube(phero.Position + new Vector3(0, 0.01f, 0), new Vector3(cellSize * 0.9f, 0.01f, cellSize * 0.9f));
             }
         }
     }

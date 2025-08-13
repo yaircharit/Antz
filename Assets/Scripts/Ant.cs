@@ -17,7 +17,7 @@ public class Ant : MonoBehaviour
     public float Strength { get; private set; } = 1.4f; // Determines how strong the ant is, affects speed when carrying food (1 is normal strength)
     public float Speed { get; private set; } = 8f;
     public float ViewRadius { get; private set; } = 10f;
-    public float ViewAngle { get; private set; } = 240f; // Angle in degrees
+    public float ViewAngle { get; private set; } = 120; // Angle in degrees
     public float PheromoneDetectionRadius { get; private set; } = 10f;
     public float PheromoneDetectionThreshold { get; private set; } = 0.1f;
 
@@ -26,7 +26,10 @@ public class Ant : MonoBehaviour
 
     //[Header("ACO Settings")]
     public float PheromoneDepositRate { get; private set; } = 0.5f;
-    public float ExplorationRate { get; private set; } = 0.2f;
+    public float CurrentPheromoneDepositRate { get; private set; } = 0.5f; // Current deposit rate, reduced over time
+    public float MinPheromoneDepositRate { get; private set; } = 0.2f; // Minimum pheromone deposit rate to prevent pheromone from disappearing too quickly
+    public float PheromoneDecayFactor { get; private set; } // How much pheromone decays per second
+    public float ExplorationRate { get; private set; } = 0.4f;
     public float ExplorationAngle { get; private set; } = 10f;
 
     public GameObject CarriedObj { get; private set; }
@@ -36,7 +39,7 @@ public class Ant : MonoBehaviour
     public Transform Target
     {
         get { return (_target) ? _target : null; } // Return null if _target is not set 
-        set { _target = value; _targetPosition = default; }// Set target and reset target position
+        set { _target = value; _targetPosition = Vector3.down; }// Set target and reset target position (Vector3.down indicates no target position, y >= 0)
     }
 
     private Vector3 _targetPosition;
@@ -50,7 +53,7 @@ public class Ant : MonoBehaviour
 
     public AntStateBase CurrentState;
     public Vector3 Position => transform.position;
-
+    public Vector3 Forward => transform.forward; // Forward direction of the ant
     public AntColony Colony { get; private set; } = null; // Reference to the colony this ant belongs to
 
 
@@ -73,6 +76,7 @@ public class Ant : MonoBehaviour
 
         ID = AntCount++; // Increment the static ant count
         Name = $"Ant_{ID}"; // Set the name based on the ID
+        PheromoneDecayFactor = PheromoneMap.DecayValue * 1.2f; // Set the pheromone decay factor based on the pheromone map's decay value
     }
 
     void Start()
@@ -89,6 +93,15 @@ public class Ant : MonoBehaviour
             // Reset ant position if it falls below a certain height
             transform.position = new Vector3(Random.Range(-10f, 10f), 1f, Random.Range(-10f, 10f));
         }
+
+        if (CurrentPheromoneDepositRate < MinPheromoneDepositRate)
+        {
+            CurrentPheromoneDepositRate = MinPheromoneDepositRate; // Ensure it doesn't go below the minimum
+        }
+        else
+        {
+            CurrentPheromoneDepositRate -= PheromoneDecayFactor ; // Decrease pheromone deposit rate over time
+        }
     }
 
     public void ChangeState(AntStateBase newState)
@@ -102,7 +115,7 @@ public class Ant : MonoBehaviour
     public void Move(PheromoneType type)
     {
         Vector3 targetDirection;
-        if ((Target != null || TargetPosition != default) && IsInView(TargetPosition))
+        if (TargetPosition != Vector3.down && IsInView(TargetPosition))
         {
             targetDirection = GetDirectionTo(TargetPosition);
         }
@@ -118,7 +131,7 @@ public class Ant : MonoBehaviour
     public void MoveInDirection(Vector3 targetDirection, float speed)
     {
         transform.forward = targetDirection;
-        transform.position += speed * Time.deltaTime * targetDirection;
+        transform.position += speed * Time.fixedDeltaTime * targetDirection;
     }
 
     public Vector3 GetDirectionTo(Vector3 targetPosition)
@@ -196,7 +209,7 @@ public class Ant : MonoBehaviour
     }
     public bool IsInView(Vector3 target)
     {
-        return IsInRange(target, ViewRadius) && Vector3.Angle(Position, GetDirectionTo(target)) <= ViewAngle / 2;
+        return IsInRange(target, ViewRadius) && Vector3.Angle(Forward, GetDirectionTo(target)) <= ViewAngle / 2;
     }
     #endregion
 
@@ -255,6 +268,10 @@ public class Ant : MonoBehaviour
     {
         return GetPheromone(type, (phero1, phero2) => phero1.Value < phero2.Value);
     }
+    public Pheromone GetMaxPheromone(PheromoneType type)
+    {
+        return GetPheromone(type, (phero, resPhero) => phero.Value > resPhero.Value);
+    }
 
     public Pheromone GetPheromone(PheromoneType type, System.Func<Pheromone, Pheromone, bool> comperator)
     {
@@ -271,14 +288,18 @@ public class Ant : MonoBehaviour
 
     public void AddPheromone(PheromoneType type)
     {
-        PheromoneMap.AddPheromone(transform.position, PheromoneDepositRate, type);
+        AddPheromone(type, CurrentPheromoneDepositRate);
+    }
+    public void AddPheromone(PheromoneType type, float value)
+    {
+        PheromoneMap.AddPheromone(transform.position, value, type);
     }
 
     public Vector3 GetPheromoneDirections(PheromoneType type)
     {
         Vector3 res;
 
-        var phero = GetMinPheromone(type);
+        var phero = GetMaxPheromone(type);
 
         if (phero != null)
         {
@@ -298,6 +319,11 @@ public class Ant : MonoBehaviour
 
         res.y = 0; // Ensure movement is horizontal
         return res;
+    }
+
+    public void ResetPheromoneDepositRate()
+    {
+        CurrentPheromoneDepositRate = PheromoneDepositRate;
     }
     #endregion
 
@@ -320,6 +346,11 @@ public class Ant : MonoBehaviour
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireCube(Target.position, Vector3.one);
+        }
+        if (TargetPosition != Vector3.down)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(TargetPosition, 1f);
         }
     }
 }

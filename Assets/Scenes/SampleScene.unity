@@ -261,10 +261,6 @@ MonoBehaviour:
   appleSize: 7
   blockSpacing: 1
   spawnHeight: 5
-  missingBlockChance: 0.15
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
   mass: 2
   spawnAreaCenter: {x: 0, y: 0}
   spawnRadius: 50
@@ -695,14 +691,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1993764124}
+  m_Children: []
   m_Father: {fileID: 1347579507}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 15, y: 0, z: 0}
 --- !u!1 &1330862183
 GameObject:
   m_ObjectHideFlags: 0
@@ -785,11 +780,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 10
-  verticalSpeed: 3
   mouseSensitivity: 2
   sprintMultiplier: 2
   pauseMenuPrefab: {fileID: 2506749748025789979, guid: 79186f2e7e15a2a4184b472afc0c6f9b, type: 3}
-  foodScoreText: {fileID: 0}
+  foodScoreText: {fileID: 561977220}
 --- !u!54 &1347579503
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -898,8 +892,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1347579501}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -932,7 +926,7 @@ Transform:
   m_GameObject: {fileID: 1760571039}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.2, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1014,7 +1008,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 561977219}
-  m_Father: {fileID: 963194228}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1095,3 +1089,4 @@ SceneRoots:
   - {fileID: 1347579507}
   - {fileID: 172167885}
   - {fileID: 205284893}
+  - {fileID: 1993764124}

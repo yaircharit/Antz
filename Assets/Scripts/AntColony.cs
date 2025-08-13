@@ -8,7 +8,7 @@ public class AntColony : MonoBehaviour
     public Ant AntPrefab; // Prefab for the ant
 
     public Vector3 NestPos { get; private set; } = Vector3.zero;
-    public float NestRadius { get; private set; } = 1.5f; // Radius around the nest where ants can drop food
+    public float NestRadius { get; private set; } = 2f; // Radius around the nest where ants can drop food
 
     private Transform AntsObject;
     public int InitialAntCount { get; private set; } = 3; // Number of ants to spawn at the start
@@ -33,7 +33,7 @@ public class AntColony : MonoBehaviour
 
     private void SpawnAnt()
     {
-        Ant ant = Instantiate(AntPrefab, NestPos +Vector3.up *2 + Random.insideUnitSphere * NestRadius, Quaternion.identity, AntsObject);
+        Ant ant = Instantiate(AntPrefab, NestPos +Vector3.up + Random.insideUnitSphere * NestRadius, Quaternion.Euler(Random.insideUnitSphere), AntsObject);
         ant.Init(this);
         Ants.Add(ant);
     }
@@ -52,6 +52,6 @@ public class AntColony : MonoBehaviour
     internal void AddFood(float carriedMass)
     {
         foodScore += carriedMass;
-        Player.Instance.foodScoreText.text = "Food: " + foodScore.ToString("F1");
+        Player.Instance.foodScoreText.text = $"Food: {foodScore}";
     }
 }

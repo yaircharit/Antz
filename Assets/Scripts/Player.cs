@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -10,14 +7,13 @@ public class Player : MonoBehaviour
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float verticalSpeed = 3f;
     [SerializeField] private float mouseSensitivity = 2f;
     [SerializeField] private float sprintMultiplier = 2f;
 
     [Header("UI")]
     [SerializeField] private GameObject pauseMenuPrefab;
     private GameObject pauseMenuInstance;
-    public TextMeshProUGUI foodScoreText;
+    public TMP_Text foodScoreText;
 
     private Rigidbody rb;
     private Camera playerCamera;
@@ -27,8 +23,6 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        foodScoreText = GetComponentInChildren<TextMeshProUGUI>();
-
     }
 
     private void Start()
@@ -105,8 +99,8 @@ public class Player : MonoBehaviour
             currentMoveSpeed *= sprintMultiplier;
         }
 
-        Vector3 move = (transform.forward * vertical + transform.right * horizontal).normalized * currentMoveSpeed * Time.fixedDeltaTime;
-        Vector3 verticalMove = transform.up * upDown * verticalSpeed * Time.fixedDeltaTime;
+        Vector3 move = currentMoveSpeed * Time.fixedDeltaTime * (transform.forward * vertical + transform.right * horizontal).normalized;
+        Vector3 verticalMove = currentMoveSpeed * Time.fixedDeltaTime * upDown * transform.up;
         rb.MovePosition(rb.position + move + verticalMove);
     }
 
