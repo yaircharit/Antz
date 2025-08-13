@@ -1,12 +1,12 @@
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Ant : MonoBehaviour
 {
     [Header("Basic Settings")]
-
     [SerializeField] public GameObject nestObj;
-    [SerializeField] public LayerMask foodLayer;
     [SerializeField] public float carryHeight = 0.75f;
     [SerializeField] public float carrySpeedModifier = 0.5f;
 
@@ -14,33 +14,33 @@ public class Ant : MonoBehaviour
 
 
     [Header("Genome Settings")]
-    [SerializeField] public float strength = 1.4f;
+    [SerializeField] public float strength = 1.4f; // Determines how strong the ant is, affects speed when carrying food (1 is normal strength)
     [SerializeField] public float speed = 8f;
-    [SerializeField] public float detectRadius = 10f;
+    [SerializeField] public float viewRadius = 10f;
+    [SerializeField] public float viewAngle = 240f; // Angle in degrees
+    [SerializeField] public float pheromoneDetectionRadius = 10f;
+    [SerializeField] public float pheromoneDetectionThreshold = 0.1f;
 
     public float ActualSpeed => speed * (IsCarrying ? (carrySpeedModifier * strength) : 1f);
 
 
     [Header("ACO Settings")]
     [SerializeField] public float pheromoneDepositRate = 0.5f;
-    [SerializeField, Range(0,1)] public float explorationRate = 0.2f;
-    [SerializeField, Range(0,180)] public float explorationAngle = 10f;
+    [SerializeField, Range(0, 1)] public float explorationRate = 0.2f;
+    [SerializeField, Range(0, 180)] public float explorationAngle = 10f;
 
     [HideInInspector] public GameObject carriedObj;
     [HideInInspector] public Transform target;
     [HideInInspector] public PheromoneMap pheromoneMap;
-    [HideInInspector] public Rigidbody rb;
-
-
 
 
     private AntStateBase currentState;
+    private Vector3 Position => transform.position;
     public AntStateBase CurrentState => currentState;
 
     void Start()
     {
         pheromoneMap = FindObjectOfType<PheromoneMap>();
-        rb = GetComponent<Rigidbody>();
         if (pheromoneMap == null)
         {
             Debug.LogError("No PheromoneMap found in scene!");
@@ -51,7 +51,7 @@ public class Ant : MonoBehaviour
     void FixedUpdate()
     {
         currentState?.Update();
-        
+
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
@@ -75,7 +75,7 @@ public class Ant : MonoBehaviour
     public void MoveInDirection(Vector3 targetDirection, float speed)
     {
         transform.forward = targetDirection;
-        transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, speed );
+        transform.position += targetDirection * speed * Time.deltaTime;
     }
     public Vector3 GetDirectionTo(GameObject target)
     {
@@ -112,20 +112,20 @@ public class Ant : MonoBehaviour
 
     public void MoveTowards(Vector3 targetPosition)
     {
-        MoveTowards(targetPosition, ActualSpeed * Time.deltaTime);
+        MoveTowards(targetPosition, ActualSpeed);
     }
     public void MoveInDirection(Vector3 targetDirection)
     {
-        MoveInDirection(targetDirection, ActualSpeed * Time.deltaTime);
+        MoveInDirection(targetDirection, ActualSpeed);
     }
     #endregion
 
     #region Disnce & Range Methods
     public Transform FindNearest(LayerMask layer)
     {
-        return FindNearest(layer, detectRadius);
+        return FindNearest(layer, viewRadius, viewAngle);
     }
-    public Transform FindNearest(LayerMask layer, float range)
+    public Transform FindNearest(LayerMask layer, float range, float angle)
     {
         Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, range, layer);
         float closestDistance = float.MaxValue;
@@ -133,7 +133,7 @@ public class Ant : MonoBehaviour
         foreach (Collider col in nearbyObjects)
         {
             float distance = GetDistanceTo(col.transform);
-            if (distance < closestDistance)
+            if (IsInView(col.transform))
             {
                 closestDistance = distance;
                 nearestObj = col.transform;
@@ -162,16 +162,16 @@ public class Ant : MonoBehaviour
     }
     public bool IsInRange(GameObject target)
     {
-        return target != null && IsInRange(target, detectRadius);
+        return target != null && IsInRange(target, pheromoneDetectionRadius);
     }
 
     public bool IsInRange(Transform target, float range)
     {
-        return target != null && IsInRange(target.position,range);
+        return target != null && IsInRange(target.position, range);
     }
     public bool IsInRange(Transform target)
     {
-        return target != null && IsInRange(target, detectRadius);
+        return target != null && IsInRange(target, pheromoneDetectionRadius);
     }
 
     public bool IsInRange(Vector3 target, float range)
@@ -180,7 +180,20 @@ public class Ant : MonoBehaviour
     }
     public bool IsInRange(Vector3 target)
     {
-        return IsInRange(target, detectRadius);
+        return IsInRange(target, pheromoneDetectionRadius);
+    }
+
+    public bool IsInView(GameObject target)
+    {
+        return IsInView(target.transform);
+    }
+    public bool IsInView(Transform target)
+    {
+        return IsInView(target.position);
+    }
+    public bool IsInView(Vector3 target)
+    {
+        return IsInRange(target, viewRadius) && Vector3.Angle(Position, GetDirectionTo(target)) <= viewAngle / 2;
     }
     #endregion
 
@@ -192,6 +205,7 @@ public class Ant : MonoBehaviour
             carriedObj.transform.SetParent(gameObject.transform);
             carriedObj.transform.position = transform.position + Vector3.up * carryHeight;
             carriedObj.GetComponent<Rigidbody>().isKinematic = true;
+            carriedObj.GetComponent<Collider>().enabled = false;
 
             return true;
         }
@@ -221,11 +235,27 @@ public class Ant : MonoBehaviour
     #region Phermone Methods
     public Pheromone GetMinPheromone(PheromoneType type)
     {
-        return pheromoneMap.GetMinPheromone(transform.position, detectRadius, type);
+        Pheromone minPhero = null;
+        foreach (var phero in pheromoneMap.GetPheromones(Position, pheromoneDetectionRadius, type))
+        {
+            if (phero.Value > pheromoneDetectionThreshold && (minPhero == null || phero.Value < minPhero.Value))
+            {
+                minPhero = phero;
+            }
+        }
+        return minPhero;
     }
     public Pheromone GetMaxPheromone(PheromoneType type)
     {
-        return pheromoneMap.GetMaxPheromone(transform.position, detectRadius, type);
+        Pheromone maxPhero = null;
+        foreach (var phero in pheromoneMap.GetPheromones(Position, pheromoneDetectionRadius, type))
+        {
+            if (phero.Value > pheromoneDetectionThreshold && (maxPhero == null || phero.Value > maxPhero.Value))
+            {
+                maxPhero = phero;
+            }
+        }
+        return maxPhero;
     }
 
     public void AddPheromone(PheromoneType type)
@@ -247,7 +277,7 @@ public class Ant : MonoBehaviour
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectRadius);
+        Gizmos.DrawWireSphere(transform.position, viewRadius);
         if (nestObj != null)
         {
             Gizmos.color = Color.blue;

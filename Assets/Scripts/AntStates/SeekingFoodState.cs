@@ -42,7 +42,7 @@ public class SeekingFoodState : AntStateBase
 
         AddPheromone();
 
-        var nearestFood = ant.FindNearest(ant.foodLayer);
+        var nearestFood = ant.FindNearest(LayerMask.GetMask("Food"));
 
         if (nearestFood != null && ant.carriedObj == null)
         {

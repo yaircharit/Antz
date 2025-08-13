@@ -121,7 +121,7 @@ public class PheromoneMap : MonoBehaviour
         {
             float distance = Vector3.Distance(phero.Position, position);
             // TODO: optimize this
-            if (distance <= range )
+            if (distance <= range)
             {
                 res.Add(phero);
             }
@@ -137,31 +137,6 @@ public class PheromoneMap : MonoBehaviour
             res.Add(type, GetPheromones(position, range, type));
         }
         return res;
-    }
-
-    public Pheromone GetMaxPheromone(Vector3 position, float range, PheromoneType type)
-    {
-        Pheromone maxPhero = null;
-        foreach (var phero in GetPheromones(position, range, type))
-        {
-            if (maxPhero == null || phero.Value > maxPhero.Value)
-            {
-                maxPhero = phero;
-            }
-        }
-        return maxPhero;
-    }
-    public Pheromone GetMinPheromone(Vector3 position, float range, PheromoneType type)
-    {
-        Pheromone minPhero = null;
-        foreach (var phero in GetPheromones(position, range, type))
-        {
-            if (minPhero == null || phero.Value < minPhero.Value)
-            {
-                minPhero = phero;
-            }
-        }
-        return minPhero;
     }
 
     void FixedUpdate()
