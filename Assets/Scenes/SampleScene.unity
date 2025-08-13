@@ -844,8 +844,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   center: {x: 0, y: 0, z: 0}
+  decayValue: 0.0005
   cellSize: 1
-  decayValue: 0.00001
 --- !u!1001 &2044142639
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -864,7 +864,7 @@ PrefabInstance:
       objectReference: {fileID: 518299586}
     - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: strength
-      value: 0.4
+      value: 1.4
       objectReference: {fileID: 0}
     - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: carryHeight
@@ -876,7 +876,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: detectRadius
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: samplePoints
@@ -884,11 +884,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: sampleRadius
-      value: 1.1
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: explorationRate
-      value: 0.4
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+      propertyPath: explorationAngle
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
       propertyPath: pheromoneDepositRate

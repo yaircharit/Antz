@@ -7,12 +7,12 @@ public class SeekingFoodState : AntStateBase
     public override void Exit() { }
     public override void Update()
     {
-        Vector3 targetPos;
+        Vector3 targetDirection;
 
-        if (ant.targetFood != null)
+        if (ant.target != null)
         {
             // Found food, move towards it
-            targetPos = ant.targetFood.position;
+            targetDirection = ant.GetDirectionTo(ant.target.position);
         }
         else
         {
@@ -21,35 +21,44 @@ public class SeekingFoodState : AntStateBase
             if (phero != null)
             {
                 // Found a pheromone marker, move towards it
-                targetPos = phero.Position;
+                targetDirection = ant.GetDirectionTo(phero.Position);
+
+                if (Random.value < ant.explorationRate)
+                {
+                    // Randomly explore around the pheromone
+                    targetDirection = ant.GetRandomDirection(targetDirection);
+                }
             }
             else
             {
                 // No pheromone found, wander randomly
-                ant.transform.forward = (Quaternion.Euler(0, Random.Range(-10f, 10f), 0) * ant.transform.forward).normalized;
-                targetPos = ant.transform.position + ant.transform.forward * ant.sampleRadius;
+                targetDirection = ant.GetRandomDirection();
 
                 // TODO: Avoid existing pheromones?
             }
         }
 
-        targetPos.y = ant.transform.position.y;
-
-        ant.transform.forward = (targetPos - ant.transform.position).normalized;
-
-        ant.transform.position = Vector3.MoveTowards(ant.transform.position, targetPos, ant.speed * Time.deltaTime);
+        ant.MoveInDirection(targetDirection);
 
         AddPheromone();
 
-        ant.FindNearestFood();
+        var nearestFood = ant.FindNearest(ant.foodLayer);
 
+        if (nearestFood != null && ant.carriedObj == null)
+        {
+            ant.target = nearestFood;
+        }
+        else if (nearestFood == null)
+        {
+            ant.target = null;
+        }
     }
 
     public override void OnTriggerEnter(Collider other)
     {
-        if (other.transform == ant.targetFood)
+        if (other.transform == ant.target)
         {
-            ant.PickupFood();
+            ant.ChangeState(new CarryingState(ant));
         }
     }
 }

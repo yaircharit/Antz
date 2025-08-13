@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System;
 
-public enum PheromoneType { Food, Home }
+public enum PheromoneType { Food, Home, Danger }
 
 public class Pheromone
 {
@@ -40,10 +39,10 @@ public class Pheromone
 
 public class PheromoneMap : MonoBehaviour
 {
-    public Vector3 center = Vector3.zero;
+    [SerializeField] public Vector3 center = Vector3.zero;
+    [SerializeField] public float decayValue = 0.001f;
 
     public float cellSize = 1f;
-    public float decayValue = 0.001f;
 
     private Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>> pheromoneGrids;
 
@@ -63,10 +62,11 @@ public class PheromoneMap : MonoBehaviour
 
     public void AddPheromone(Vector3 worldPos, float amount, PheromoneType type)
     {
-        if (pheromoneGrids[type].TryGetValue(Floor(worldPos), out Pheromone pheromone))
-            pheromone.Value = amount;
+        var pos = Floor(worldPos);
+        if (pheromoneGrids[type].TryGetValue(pos, out Pheromone pheromone))
+            pheromone.Value = amount; // Update existing pheromone value
         else
-            pheromoneGrids[type][Floor(worldPos)] = new Pheromone(type, amount, Floor(worldPos));
+            pheromoneGrids[type][pos] = new Pheromone(type, amount, pos);
     }
 
     public Pheromone GetPheromone(Vector3 worldPos, PheromoneType type)
@@ -112,10 +112,59 @@ public class PheromoneMap : MonoBehaviour
         {
             RemovePhermone(pheromone);
         }
-        
     }
 
-    void Update()
+    public Pheromone[] GetPheromones(Vector3 position, float range, PheromoneType type)
+    {
+        List<Pheromone> res = new();
+        foreach (var phero in pheromoneGrids[type].Values)
+        {
+            float distance = Vector3.Distance(phero.Position, position);
+            // TODO: optimize this
+            if (distance <= range )
+            {
+                res.Add(phero);
+            }
+        }
+        return res.ToArray();
+    }
+
+    public Dictionary<PheromoneType, Pheromone[]> GetPheromones(Vector3 position, float range)
+    {
+        Dictionary<PheromoneType, Pheromone[]> res = new();
+        foreach (var type in pheromoneGrids.Keys)
+        {
+            res.Add(type, GetPheromones(position, range, type));
+        }
+        return res;
+    }
+
+    public Pheromone GetMaxPheromone(Vector3 position, float range, PheromoneType type)
+    {
+        Pheromone maxPhero = null;
+        foreach (var phero in GetPheromones(position, range, type))
+        {
+            if (maxPhero == null || phero.Value > maxPhero.Value)
+            {
+                maxPhero = phero;
+            }
+        }
+        return maxPhero;
+    }
+    public Pheromone GetMinPheromone(Vector3 position, float range, PheromoneType type)
+    {
+        Pheromone minPhero = null;
+        foreach (var phero in GetPheromones(position, range, type))
+        {
+            if (minPhero == null || phero.Value < minPhero.Value)
+            {
+                minPhero = phero;
+            }
+        }
+        return minPhero;
+    }
+
+    void FixedUpdate()
     {
         Evaporate();
     }

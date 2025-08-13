@@ -1,25 +1,38 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Ant : MonoBehaviour
 {
     [Header("Basic Settings")]
-    [SerializeField] public float speed = 3f;
-    [SerializeField] public float detectRadius = 5f;
+
     [SerializeField] public GameObject nestObj;
     [SerializeField] public LayerMask foodLayer;
-    [SerializeField, Range(0f, 1f)] public float strength = 0f;
     [SerializeField] public float carryHeight = 0.75f;
+    [SerializeField] public float carrySpeedModifier = 0.5f;
+
+    public bool IsCarrying => carriedObj != null;
+
+
+    [Header("Genome Settings")]
+    [SerializeField] public float strength = 1.4f;
+    [SerializeField] public float speed = 8f;
+    [SerializeField] public float detectRadius = 10f;
+
+    public float ActualSpeed => speed * (IsCarrying ? (carrySpeedModifier * strength) : 1f);
+
 
     [Header("ACO Settings")]
-    [SerializeField] public float pheromoneDepositRate = 1f;
-    [SerializeField] public float pheromoneInfluence = 2f;
-    [SerializeField] public float explorationRate = 0.2f;
-    [SerializeField] public float sampleRadius = 2f;
-    [SerializeField] public int samplePoints = 8;
+    [SerializeField] public float pheromoneDepositRate = 0.5f;
+    [SerializeField, Range(0,1)] public float explorationRate = 0.2f;
+    [SerializeField, Range(0,180)] public float explorationAngle = 10f;
 
-    [HideInInspector] public GameObject carriedFood;
-    [HideInInspector] public Transform targetFood;
+    [HideInInspector] public GameObject carriedObj;
+    [HideInInspector] public Transform target;
     [HideInInspector] public PheromoneMap pheromoneMap;
+    [HideInInspector] public Rigidbody rb;
+
+
+
 
     private AntStateBase currentState;
     public AntStateBase CurrentState => currentState;
@@ -27,6 +40,7 @@ public class Ant : MonoBehaviour
     void Start()
     {
         pheromoneMap = FindObjectOfType<PheromoneMap>();
+        rb = GetComponent<Rigidbody>();
         if (pheromoneMap == null)
         {
             Debug.LogError("No PheromoneMap found in scene!");
@@ -34,7 +48,7 @@ public class Ant : MonoBehaviour
         ChangeState(new SeekingFoodState(this));
     }
 
-    void Update()
+    void FixedUpdate()
     {
         currentState?.Update();
         
@@ -52,54 +66,179 @@ public class Ant : MonoBehaviour
         currentState?.Enter();
     }
 
-    public void FindNearestFood()
+    #region Movement & Direction Methods
+    public void MoveTowards(Vector3 targetPosition, float speed)
     {
-        Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, detectRadius, foodLayer);
+        MoveInDirection((targetPosition - transform.position).normalized, speed);
+    }
+
+    public void MoveInDirection(Vector3 targetDirection, float speed)
+    {
+        transform.forward = targetDirection;
+        transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, speed );
+    }
+    public Vector3 GetDirectionTo(GameObject target)
+    {
+        return GetDirectionTo(target.transform);
+    }
+    public Vector3 GetDirectionTo(Transform target)
+    {
+        return GetDirectionTo(target.position);
+    }
+
+    public Vector3 GetDirectionTo(Vector3 targetPosition)
+    {
+        return (targetPosition - transform.position).normalized;
+    }
+    public Vector3 GetRandomDirection(Vector3 direction, float angle)
+    {
+        float randomAngle = Random.Range(-angle, angle);
+        return Quaternion.Euler(0, randomAngle, 0) * direction;
+    }
+
+    public Vector3 GetRandomDirection(float angle)
+    {
+        return GetRandomDirection(transform.forward, angle);
+    }
+    public Vector3 GetRandomDirection(Vector3 direction)
+    {
+        return GetRandomDirection(direction, explorationAngle);
+    }
+
+    public Vector3 GetRandomDirection()
+    {
+        return GetRandomDirection(explorationAngle);
+    }
+
+    public void MoveTowards(Vector3 targetPosition)
+    {
+        MoveTowards(targetPosition, ActualSpeed * Time.deltaTime);
+    }
+    public void MoveInDirection(Vector3 targetDirection)
+    {
+        MoveInDirection(targetDirection, ActualSpeed * Time.deltaTime);
+    }
+    #endregion
+
+    #region Disnce & Range Methods
+    public Transform FindNearest(LayerMask layer)
+    {
+        return FindNearest(layer, detectRadius);
+    }
+    public Transform FindNearest(LayerMask layer, float range)
+    {
+        Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, range, layer);
         float closestDistance = float.MaxValue;
-        Transform closestFood = null;
+        Transform nearestObj = null;
         foreach (Collider col in nearbyObjects)
         {
-            float distance = Vector3.Distance(transform.position, col.transform.position);
+            float distance = GetDistanceTo(col.transform);
             if (distance < closestDistance)
             {
                 closestDistance = distance;
-                closestFood = col.transform;
+                nearestObj = col.transform;
             }
         }
-        if (closestFood != null && carriedFood == null)
+        return nearestObj;
+    }
+    public float GetDistanceTo(GameObject target)
+    {
+        return GetDistanceTo(target.transform);
+    }
+
+    public float GetDistanceTo(Transform target)
+    {
+        return GetDistanceTo(target.position);
+    }
+
+    public float GetDistanceTo(Vector3 targetPosition)
+    {
+        return Vector3.Distance(transform.position, targetPosition);
+    }
+
+    public bool IsInRange(GameObject target, float range)
+    {
+        return target != null && IsInRange(target.transform, range);
+    }
+    public bool IsInRange(GameObject target)
+    {
+        return target != null && IsInRange(target, detectRadius);
+    }
+
+    public bool IsInRange(Transform target, float range)
+    {
+        return target != null && IsInRange(target.position,range);
+    }
+    public bool IsInRange(Transform target)
+    {
+        return target != null && IsInRange(target, detectRadius);
+    }
+
+    public bool IsInRange(Vector3 target, float range)
+    {
+        return GetDistanceTo(target) <= range;
+    }
+    public bool IsInRange(Vector3 target)
+    {
+        return IsInRange(target, detectRadius);
+    }
+    #endregion
+
+    public bool Pickup(Transform obj)
+    {
+        if (obj != null)
         {
-            targetFood = closestFood;
+            carriedObj = obj.gameObject;
+            carriedObj.transform.SetParent(gameObject.transform);
+            carriedObj.transform.position = transform.position + Vector3.up * carryHeight;
+            carriedObj.GetComponent<Rigidbody>().isKinematic = true;
+
+            return true;
         }
-        else if (closestFood == null)
+        return false;
+    }
+
+    public bool Pickup()
+    {
+        if (Pickup(target))
         {
-            targetFood = null;
+            target = null;
+            return true;
+        }
+        return false;
+    }
+
+    public void Drop()
+    {
+        if (carriedObj != null)
+        {
+            carriedObj.transform.SetParent(null);
+            Destroy(carriedObj);
+            carriedObj = null;
         }
     }
 
-    public void PickupFood()
+    #region Phermone Methods
+    public Pheromone GetMinPheromone(PheromoneType type)
     {
-        if (targetFood != null)
-        {
-            carriedFood = targetFood.gameObject;
-            carriedFood.transform.SetParent(gameObject.transform);
-            carriedFood.transform.position = transform.position + Vector3.up * carryHeight;
-            carriedFood.GetComponent<Rigidbody>().isKinematic = true;
-            ChangeState(new CarryingFoodState(this));
-            targetFood = null;
-        }
+        return pheromoneMap.GetMinPheromone(transform.position, detectRadius, type);
+    }
+    public Pheromone GetMaxPheromone(PheromoneType type)
+    {
+        return pheromoneMap.GetMaxPheromone(transform.position, detectRadius, type);
     }
 
-    public void DropFoodInNest()
+    public void AddPheromone(PheromoneType type)
     {
-        if (carriedFood != null)
-        {
-            carriedFood.transform.SetParent(null);
-            Destroy(carriedFood);
-            carriedFood = null;
-            ChangeState(new SeekingFoodState(this)); // Uncommenting to change state after dropping food
-        }
+        pheromoneMap.AddPheromone(transform.position, pheromoneDepositRate, type);
     }
-     
+    #endregion
+
+    public override string ToString()
+    {
+        return $"Ant at {transform.position}, {currentState.GetType().Name}";
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         currentState?.OnTriggerEnter(other);
@@ -114,39 +253,10 @@ public class Ant : MonoBehaviour
             Gizmos.color = Color.blue;
             Gizmos.DrawWireSphere(nestObj.transform.position, 1.5f);
         }
-        if (targetFood != null)
+        if (target != null)
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawWireCube(targetFood.position, Vector3.one);
+            Gizmos.DrawWireCube(target.position, Vector3.one);
         }
-    }
-
-    public Pheromone GetMinPheromone(PheromoneType type)
-    {
-        Pheromone minPheromone = null;
-        for (int i = 0; i < samplePoints; i++)
-        {
-            float angle = i * (360f / samplePoints);
-            Vector3 samplePoint = transform.position + Quaternion.Euler(0, angle, 0) * (Vector3.forward) * sampleRadius;
-            var pheromone = pheromoneMap.GetPheromone(samplePoint, type);
-            if (pheromone != null && pheromone.Position != Vector3Int.FloorToInt(transform.position) && pheromone.Value > 0 && (minPheromone == null || pheromone.Value < minPheromone.Value))
-            {
-                minPheromone = pheromone;
-            }
-        }
-        Debug.Log($"{this}, {minPheromone}");
-
-        return minPheromone;
-    }
-
-
-    public void AddPheromone(PheromoneType type)
-    {
-        pheromoneMap.AddPheromone(transform.position, pheromoneDepositRate, type);
-    }
-
-    public override string ToString()
-    {
-        return $"Ant at {transform.position}, {currentState.GetType().Name}";
     }
 }
