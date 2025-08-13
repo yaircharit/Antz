@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerControls : MonoBehaviour
+public class Player : MonoBehaviour
 {
+    public static Player Instance { get; private set; }
+
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float verticalSpeed = 3f;
@@ -14,11 +17,19 @@ public class PlayerControls : MonoBehaviour
     [Header("UI")]
     [SerializeField] private GameObject pauseMenuPrefab;
     private GameObject pauseMenuInstance;
+    public TextMeshProUGUI foodScoreText;
 
     private Rigidbody rb;
     private Camera playerCamera;
     private float xRotation = 0f;
     private bool isPaused = false;
+
+    private void Awake()
+    {
+        Instance = this;
+        foodScoreText = GetComponentInChildren<TextMeshProUGUI>();
+
+    }
 
     private void Start()
     {

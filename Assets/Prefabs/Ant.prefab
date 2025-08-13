@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6086677681422084550}
   - component: {fileID: 2777002188372395389}
   - component: {fileID: 7443890273072984053}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Back
   m_TagString: Body
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 3597060321383131038}
   - component: {fileID: 8941158444069183149}
   - component: {fileID: 6926542534303007601}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Head
   m_TagString: Body
   m_Icon: {fileID: 0}
@@ -255,8 +255,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7365062815238558939}
   serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 1
+  m_Mass: 10
+  m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -286,22 +286,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94a5ec308f43aa84ab8dc292ed2a6a61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nestObj: {fileID: 0}
-  foodLayer:
-    serializedVersion: 2
-    m_Bits: 1024
-  carryHeight: 1
-  carrySpeedModifier: 0.5
-  strength: 1.4
-  speed: 10
-  detectRadius: 15
-  pheromoneDepositRate: 0.5
-  explorationRate: 0.1
-  explorationAngle: 10
-  carriedObj: {fileID: 0}
-  target: {fileID: 0}
-  pheromoneMap: {fileID: 0}
-  rb: {fileID: 0}
 --- !u!136 &2658482667021382224
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -317,7 +301,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -337,7 +321,7 @@ GameObject:
   - component: {fileID: 2936074625792069783}
   - component: {fileID: 7819254265451414374}
   - component: {fileID: 6061253736654196564}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Mid
   m_TagString: Body
   m_Icon: {fileID: 0}

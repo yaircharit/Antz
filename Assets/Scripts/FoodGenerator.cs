@@ -11,6 +11,8 @@ public class FoodGenerator : MonoBehaviour
     [SerializeField] private float spawnHeight = 10f;
     [SerializeField] private float missingBlockChance = 0.15f; // 0.0 = no missing, 1.0 = all missing
     [SerializeField] private LayerMask groundMask = ~0; // Default to everything
+    [SerializeField] private float mass = 5f; // Mass of each apple block
+
     [Header("Random Spawn Area")]
     [SerializeField] private Vector2 spawnAreaCenter = Vector2.zero; // Center point for spawn area
     [SerializeField] private float spawnRadius = 10f; // Distance from center to edge of spawn area
@@ -71,7 +73,7 @@ public class FoodGenerator : MonoBehaviour
                             rb = appleBlock.AddComponent<Rigidbody>();
                         }
                         rb.useGravity = true;
-                        rb.mass = 1f;
+                        rb.mass = mass;
                     }
                 }
             }

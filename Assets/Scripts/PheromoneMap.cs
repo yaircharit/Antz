@@ -39,8 +39,10 @@ public class Pheromone
 
 public class PheromoneMap : MonoBehaviour
 {
-    [SerializeField] public Vector3 center = Vector3.zero;
-    [SerializeField] public float decayValue = 0.001f;
+    public static PheromoneMap Instance { get; private set; }
+
+    public Vector3 Center { get; private set; } = Vector3.zero; 
+    public float DecayValue { get; private set; } = 0.00005f;
 
     public float cellSize = 1f;
 
@@ -48,11 +50,16 @@ public class PheromoneMap : MonoBehaviour
 
     void Awake()
     {
-        pheromoneGrids = new Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>>();
-        foreach (PheromoneType type in System.Enum.GetValues(typeof(PheromoneType)))
+        Instance ??= this;
+
+        if (pheromoneGrids == null)
         {
-            pheromoneGrids[type] = new Dictionary<Vector3Int, Pheromone>();
-        }
+            pheromoneGrids = new Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>>();
+            foreach (PheromoneType type in System.Enum.GetValues(typeof(PheromoneType)))
+            {
+                pheromoneGrids[type] = new Dictionary<Vector3Int, Pheromone>();
+            }
+        }   
     }
 
     public Vector3Int Floor(Vector3 worldPos)
@@ -101,7 +108,7 @@ public class PheromoneMap : MonoBehaviour
         {
             foreach (var phero in grid.Values)
             {
-                if (phero.Decay(decayValue) <= 0)
+                if (phero.Decay(DecayValue) <= 0)
                 {
                     toRemove.Add(phero);
                 }

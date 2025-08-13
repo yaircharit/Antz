@@ -2,10 +2,11 @@ using UnityEngine;
 
 public class CarryingState : AntStateBase
 {
-    public CarryingState(Ant ant) : base(ant, PheromoneType.Food) { }
+    public CarryingState(Ant ant) : base(ant) { }
 
     public override void Enter() {
         ant.Pickup();
+        ant.TargetPosition = ant.Colony.NestPos;
     }
 
     public override void Exit() {
@@ -14,43 +15,18 @@ public class CarryingState : AntStateBase
 
     public override void Update()
     {
-        if (ant.carriedObj == null) return;
-        Vector3 targetDirection;
+        if (ant.CarriedObj == null) return;
 
-        if (ant.IsInRange(ant.nestObj))
-        {
-            targetDirection = ant.GetDirectionTo(ant.nestObj);
-        }
-        else
-        {
-            var phero = ant.GetMinPheromone(PheromoneType.Home);
-
-            if (phero != null)
-            {
-                // Move towards pheromone marker
-                targetDirection = ant.GetDirectionTo(phero.Position);
-                if (Random.value < ant.explorationRate)
-                {
-                    // Randomly explore around the pheromone
-                    targetDirection = ant.GetRandomDirection(targetDirection);
-                }
-            }
-            else
-            {
-                // No pheromone found, wander randomly
-                targetDirection = ant.GetRandomDirection();
-            }
-        }
-
-        ant.MoveInDirection(targetDirection);
-        AddPheromone();
-    }
-
-    public override void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject == ant.nestObj && ant.carriedObj != null)
+        if (ant.IsInNest() && ant.CarriedObj != null)
         {
             ant.ChangeState(new SeekingFoodState(ant));
+            ant.Colony.AddFood(ant.CarriedMass);
+            return; 
         }
+
+        ant.Move(PheromoneType.Home);
+        ant.AddPheromone(PheromoneType.Food);
     }
+
+   
 }
