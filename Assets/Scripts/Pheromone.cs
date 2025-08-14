@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum PheromoneType { Food, Home, Nest, Danger } //TODO: Implement Nest & Danger pheromones logic
+public enum PheromoneType { None, Food, Home, Nest, Danger, Panic } //TODO: Implement Nest & Danger pheromones logic
 
 public class Pheromone
 {

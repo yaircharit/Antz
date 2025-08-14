@@ -11,7 +11,7 @@ public class AntColony : MonoBehaviour
     public float NestRadius { get; private set; } = 2f; // Radius around the nest where ants can drop food
 
     private Transform AntsObject;
-    public int InitialAntCount { get; private set; } = 3; // Number of ants to spawn at the start
+    public int InitialAntCount { get; private set; } = 6; // Number of ants to spawn at the start
     public List<Ant> Ants { get; private set; } = new List<Ant>();
 
     public float foodScore = 0; // Score for the amount of food collected
@@ -49,9 +49,21 @@ public class AntColony : MonoBehaviour
         Gizmos.DrawWireSphere(NestPos, NestRadius);
     }
 
-    internal void AddFood(float carriedMass)
+    internal void AddFood(float amount)
     {
-        foodScore += carriedMass;
+        foodScore += amount;
         Player.Instance.foodScoreText.text = $"Food: {foodScore}";
+    }
+
+    internal void RemoveFood(float amount)
+    {
+        foodScore -= amount;
+        if (foodScore < 0) foodScore = 0; // Ensure food score doesn't go negative
+        Player.Instance.foodScoreText.text = $"Food: {foodScore}";
+    }
+
+    internal bool HasFood()
+    {
+        return foodScore > 0;
     }
 }

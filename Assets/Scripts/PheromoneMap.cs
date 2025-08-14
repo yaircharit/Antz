@@ -6,7 +6,7 @@ public class PheromoneMap : MonoBehaviour
 {
     public static PheromoneMap Instance { get; private set; }
 
-    public Vector3 Center { get; private set; } = Vector3.zero; 
+    public Vector3 Center { get; private set; } = Vector3.zero;
     public float DecayValue { get; private set; } = 0.00015f;
 
     public float cellSize = 1f;
@@ -24,7 +24,7 @@ public class PheromoneMap : MonoBehaviour
             {
                 pheromoneGrids[type] = new Dictionary<Vector3Int, Pheromone>();
             }
-        }   
+        }
     }
 
     public Vector3Int Floor(Vector3 worldPos)
@@ -73,7 +73,7 @@ public class PheromoneMap : MonoBehaviour
         {
             foreach (var phero in grid.Values)
             {
-                if (phero.Decay(DecayValue) <= 0)
+                if (phero.Decay(DecayValue) <= 0.001f)
                 {
                     toRemove.Add(phero);
                 }
