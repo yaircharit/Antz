@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class FoodGenerator : MonoBehaviour
 {
+    private static FoodGenerator Instance { get; set; }
+
     [Header("Apple Block Settings")]
-    [SerializeField] private GameObject appleBlockPrefab; // Assign a cube or apple-like prefab in the inspector
+    [SerializeField] private FoodBlock appleBlockPrefab; // Assign a cube or apple-like prefab in the inspector
     [SerializeField] private int appleSize = 7; // Size of the apple grid (odd number recommended)
     [SerializeField] private float blockSpacing = 1.0f;
     [SerializeField] private float spawnHeight = 7f;
-    [SerializeField] private float mass = 5f; // Mass of each apple block
 
     [Header("Random Spawn Area")]
     [SerializeField] private Vector2 spawnAreaCenter = Vector2.zero; // Center point for spawn area
@@ -17,22 +18,37 @@ public class FoodGenerator : MonoBehaviour
 
     private GameObject foodParent; // Parent for all spawned food blocks
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     void Start()
     {
         // Create a parent GameObject for all food blocks
-        foodParent = new GameObject("FoodParent");
+        foodParent = new GameObject("Apple");
         foodParent.transform.SetParent(transform);
 
-        // Get random position within square defined by center and radius
-        float randX = Random.Range(spawnAreaCenter.x - spawnRadius, spawnAreaCenter.x + spawnRadius);
-        float randZ = Random.Range(spawnAreaCenter.y - spawnRadius, spawnAreaCenter.y + spawnRadius);
-        Vector3 spawnPos = new(randX, spawnHeight, randZ);
-        SpawnAppleShape(spawnPos);
+        SpawnAppleShape();
     }
 
-    void SpawnAppleShape(Vector3 center)
+    private void Update()
     {
-        int r = appleSize / 2;
+        if (Input.GetKeyDown(KeyCode.RightControl))
+        {
+            SpawnAppleShape();
+        }
+    }
+
+    public static void SpawnAppleShape()
+    {
+        // Get random position within square defined by center and radius
+        float randX = Random.Range(Instance.spawnAreaCenter.x - Instance.spawnRadius, Instance.spawnAreaCenter.x + Instance.spawnRadius);
+        float randZ = Random.Range(Instance.spawnAreaCenter.y - Instance.spawnRadius, Instance.spawnAreaCenter.y + Instance.spawnRadius);
+        Vector3 spawnPos = new(randX, Instance.spawnHeight, randZ);
+
+
+        int r = Instance.appleSize / 2;
         // Apple shape: ellipsoid with a slight flattening and a "dimple" for the apple top
         for (int x = -r; x <= r; x++)
         {
@@ -50,16 +66,8 @@ public class FoodGenerator : MonoBehaviour
                     // Only spawn blocks inside the apple shape
                     if (ellipsoid <= 1.0f)
                     {
-                        Vector3 pos = center + new Vector3(x * blockSpacing, y * blockSpacing, z * blockSpacing);
-                        GameObject appleBlock = Instantiate(appleBlockPrefab, pos, Quaternion.identity);
-                        appleBlock.transform.SetParent(foodParent.transform);
-                        Rigidbody rb = appleBlock.GetComponent<Rigidbody>();
-                        if (rb == null)
-                        {
-                            rb = appleBlock.AddComponent<Rigidbody>();
-                        }
-                        rb.useGravity = true;
-                        rb.mass = mass;
+                        Vector3 pos = spawnPos + new Vector3(x * Instance.blockSpacing, y * Instance.blockSpacing, z * Instance.blockSpacing);
+                        Instantiate(Instance.appleBlockPrefab, pos, Quaternion.identity, Instance.foodParent.transform);
                     }
                 }
             }

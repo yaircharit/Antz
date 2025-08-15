@@ -257,11 +257,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29c167bb5044a524bbd0b461870f1e90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  appleBlockPrefab: {fileID: 7607634909766100600, guid: db60231b168fc80438fecf0107f8b385, type: 3}
+  appleBlockPrefab: {fileID: 947474979183635148, guid: db60231b168fc80438fecf0107f8b385, type: 3}
   appleSize: 7
   blockSpacing: 1
   spawnHeight: 5
-  mass: 2
   spawnAreaCenter: {x: 0, y: 0}
   spawnRadius: 50
 --- !u!4 &172167885
@@ -745,6 +744,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AntPrefab: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
+  NestPosition: {x: 0, y: 0, z: 0}
+  NestSize: 2
+  InitialAntCount: 6
   foodScore: 0
 --- !u!1 &1347579501
 GameObject:
@@ -945,6 +947,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellSize: 1
+  PheromoneDepositValue: 0.5
+  PheromoneDepositRate: 0.1
+  MinPheromoneDepositValue: 0.1
+  PheromoneDecayFactor: 0.0001
+  PheromoneDistanceMultiplier: 50
+  PheromoneDetectionDistance: 5
+  PheromoneDetectionThreshold: 0.1
+  ExplorationRate: 0.2
+  ExplorationAngle: 20
 --- !u!1 &1834842690
 GameObject:
   m_ObjectHideFlags: 0
@@ -955,7 +966,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1834842691}
   m_Layer: 0
-  m_Name: Food
+  m_Name: FoodStorage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

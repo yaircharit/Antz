@@ -94,7 +94,7 @@ public class Player : MonoBehaviour
 
         // Sprinting
         float currentMoveSpeed = moveSpeed;
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        if (Input.GetKey(KeyCode.LeftControl))
         {
             currentMoveSpeed *= sprintMultiplier;
         }

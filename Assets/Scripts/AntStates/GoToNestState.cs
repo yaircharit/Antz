@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class GoToNestState : AntStateBase
+public class GoToNestState : StateBase
 {
     PheromoneType pheroType;
     public GoToNestState(Ant ant, PheromoneType pheroType) : base(ant)
@@ -31,6 +31,7 @@ public class GoToNestState : AntStateBase
                 ant.Colony.AddFood(ant.CarriedMass);
                 ant.Drop(); // Drop carried object in nest
             }
+
             ant.ChangeState(new SeekingFoodState(ant)); // If not hungry, seek food
             return;
         }

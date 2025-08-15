@@ -6,12 +6,14 @@ using static UnityEngine.GraphicsBuffer;
 public class AntColony : MonoBehaviour
 {
     public Ant AntPrefab; // Prefab for the ant
+    public Vector3 NestPosition; // Position of the nest, can be set in the inspector or dynamically
+    public float NestSize = 2f; // Size of the nest area, can be set in the inspector or dynamically
+    public int InitialAntCount = 6; // Number of ants to spawn at the start, can be set in the inspector or dynamically
 
     public Vector3 NestPos { get; private set; } = Vector3.zero;
     public float NestRadius { get; private set; } = 2f; // Radius around the nest where ants can drop food
 
     private Transform AntsObject;
-    public int InitialAntCount { get; private set; } = 6; // Number of ants to spawn at the start
     public List<Ant> Ants { get; private set; } = new List<Ant>();
 
     public float foodScore = 0; // Score for the amount of food collected
@@ -19,6 +21,8 @@ public class AntColony : MonoBehaviour
     private void Awake()
     {
         AntsObject = transform.Find("Ants");
+        NestPos = NestPosition;
+        NestRadius = NestSize;
     }
 
     // Start is called before the first frame update

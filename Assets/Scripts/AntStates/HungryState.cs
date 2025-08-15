@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class HungryState : AntStateBase
+public class HungryState : StateBase
 {
     public HungryState(Ant ant) : base(ant) { }
     public override void Enter()
@@ -30,7 +30,6 @@ public class HungryState : AntStateBase
             return;
         }
 
-        // If in nest, check if food is available
         if (!ant.Colony.HasFood())
         {
             // TODO: panic? YES! PANIC!
