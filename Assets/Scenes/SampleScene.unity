@@ -950,11 +950,11 @@ MonoBehaviour:
   PheromoneDepositValue: 0.5
   PheromoneDepositRate: 0.1
   MinPheromoneDepositValue: 0.1
-  PheromoneDecayFactor: 0.0001
-  PheromoneDistanceMultiplier: 50
+  PheromoneDecayFactor: 0.00005
+  PheromoneDistanceMultiplier: 100
   PheromoneDetectionDistance: 5
-  PheromoneDetectionThreshold: 0.1
-  ExplorationRate: 0.2
+  PheromoneDetectionThreshold: 0.0001
+  ExplorationRate: 0.5
   ExplorationAngle: 20
 --- !u!1 &1834842690
 GameObject:

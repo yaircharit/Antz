@@ -51,7 +51,8 @@ public class PheromoneMap : MonoBehaviour
         var pos = Floor(worldPos);
         if (pheromoneGrids[type].TryGetValue(pos, out Pheromone pheromone))
         {
-            pheromone.Value = amount; // Update existing pheromone value
+            if (amount > pheromone.Value)
+                pheromone.Value = amount; // Update existing pheromone value
             if (pheromone.Value > 1f)
             {
                 pheromone.Value = 1f; // Cap the value to prevent overflow

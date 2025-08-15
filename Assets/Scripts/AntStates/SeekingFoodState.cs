@@ -38,7 +38,6 @@ public class SeekingFoodState : StateBase
                 return;
             }
 
-            ant.ResetPheromoneDepositRate();
             ant.ChangeState(new GoToNestState(ant, PheromoneType.Food));
             return;
         }

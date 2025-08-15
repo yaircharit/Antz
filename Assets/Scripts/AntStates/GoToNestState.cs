@@ -15,6 +15,10 @@ public class GoToNestState : StateBase
     public override void Enter()
     {
         ant.TargetPosition = ant.Colony.NestPos;
+        if (pheroType != PheromoneType.None)
+        {
+            ant.ResetPheromoneDepositRate(); // Reset pheromone deposit rate when entering this state
+        }
     }
     public override void Exit()
     {
