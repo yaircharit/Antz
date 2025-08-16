@@ -12,14 +12,10 @@ public class PheromoneMap : MonoBehaviour
     private Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>> pheromoneGrids;
 
     [Header("ACO Configuration")]
-    
+
     [SerializeField] private float PheromoneDepositValue = 0.5f;
-    [SerializeField] private float PheromoneDepositRate; // Time in seconds to deposit pheromone
-    [SerializeField] private float MinPheromoneDepositValue = 0.2f;  // Minimum pheromone deposit value
     [SerializeField] private float PheromoneDecayFactor = 0.0001f; // How much pheromone decays per second
-    [SerializeField] private float PheromoneDistanceMultiplier = 20; // How much pheromone decays per distance traveled
     [SerializeField] private float PheromoneDetectionDistance = 2;
-    [SerializeField] private float PheromoneDetectionThreshold = 0.1f;
     [SerializeField] private float ExplorationRate = 0.3f;
     [SerializeField] private float ExplorationAngle = 20f;
     public ACO ACOConfig { get; private set; }
@@ -29,7 +25,7 @@ public class PheromoneMap : MonoBehaviour
     {
         Instance ??= this;
 
-        ACOConfig ??= new(PheromoneDepositValue, PheromoneDepositRate, MinPheromoneDepositValue,PheromoneDecayFactor, PheromoneDistanceMultiplier ,PheromoneDetectionDistance, PheromoneDetectionThreshold, ExplorationRate, ExplorationAngle);
+        ACOConfig ??= new(PheromoneDepositValue, PheromoneDecayFactor, PheromoneDetectionDistance, ExplorationRate, ExplorationAngle);
 
         if (pheromoneGrids == null)
         {
@@ -41,22 +37,17 @@ public class PheromoneMap : MonoBehaviour
         }
     }
 
-    public Vector3Int Floor(Vector3 worldPos)
+    public Vector3Int Round(Vector3 worldPos)
     {
-        return Vector3Int.FloorToInt(worldPos);
+        return Vector3Int.RoundToInt(worldPos);
     }
 
     public void AddPheromone(Vector3 worldPos, float amount, PheromoneType type)
     {
-        var pos = Floor(worldPos);
+        var pos = Round(worldPos);
         if (pheromoneGrids[type].TryGetValue(pos, out Pheromone pheromone))
         {
-            if (amount > pheromone.Value)
-                pheromone.Value = amount; // Update existing pheromone value
-            if (pheromone.Value > 1f)
-            {
-                pheromone.Value = 1f; // Cap the value to prevent overflow
-            }
+            pheromone.Value = Mathf.Max(amount, pheromone.Value); // Update existing pheromone value
         }
         else
             pheromoneGrids[type][pos] = new Pheromone(type, amount, pos);
@@ -68,7 +59,7 @@ public class PheromoneMap : MonoBehaviour
     }
     public void RemovePhermone(Vector3 worldPos, PheromoneType type)
     {
-        Vector3Int gridPos = Floor(worldPos);
+        Vector3Int gridPos = Round(worldPos);
         if (pheromoneGrids[type].ContainsKey(gridPos))
         {
             pheromoneGrids[type].Remove(gridPos);
@@ -82,7 +73,7 @@ public class PheromoneMap : MonoBehaviour
         {
             foreach (var phero in grid.Values)
             {
-                if (phero.Decay(ACOConfig.DecayFactor) <= 0.001f)
+                if (phero.Decay(ACOConfig.DecayFactor) <= ACO.Instace.DecayFactor)
                 {
                     toRemove.Add(phero);
                 }
@@ -99,20 +90,19 @@ public class PheromoneMap : MonoBehaviour
     {
         List<Pheromone> res = new();
 
-        Vector3Int gridPos = Floor(position);
+        Vector3Int gridPos = Round(position);
 
         for (int i = -(int)range; i < range; i++)
         {
-            for (int j = -(int)range; j < range; j++) // TODO: optimize this, check only within range not in a square
+            for (int j = -(int)range; j < range; j++)
             {
                 Vector3Int checkPos = new(gridPos.x + i, gridPos.y, gridPos.z + j);
-                if (pheromoneGrids[type].TryGetValue(checkPos, out Pheromone phero))
+
+                if (gridPos != checkPos
+                    && Vector3.Distance(checkPos, position) <= range
+                    && pheromoneGrids[type].TryGetValue(checkPos, out Pheromone phero))
                 {
-                    float distance = Vector3.Distance(phero.Position, position);
-                    if (distance <= range)
-                    {
-                        res.Add(phero);
-                    }
+                    res.Add(phero);
                 }
             }
         }
@@ -141,9 +131,9 @@ public class PheromoneMap : MonoBehaviour
     public Pheromone GetPheromone(PheromoneType type, Vector3 center, System.Func<Pheromone, Pheromone, bool> comperator, float range = 0)
     {
         Pheromone resPhero = null;
-        foreach (var phero in GetPheromones(center, (range > 0)? range: PheromoneDetectionDistance, type))
+        foreach (var phero in GetPheromones(center, (range > 0) ? range : PheromoneDetectionDistance, type))
         {
-            if (phero.Value > PheromoneDetectionThreshold && (resPhero == null || comperator(phero, resPhero)))
+            if ((resPhero == null || comperator(phero, resPhero)))
             {
                 resPhero = phero;
             }

@@ -9,7 +9,7 @@ public class Pheromone
     public Vector3Int Position;
 
     private Color color;
-    public Color Color => new(color.r, color.g, color.b, Value);
+    public Color Color => new(color.r, color.g, color.b, Value/2);
 
     public Pheromone(PheromoneType type, float value, Vector3Int position)
     {
@@ -27,11 +27,11 @@ public class Pheromone
 
     public float Decay(float decayFactor)
     {
-        return Value -= decayFactor;
+        return Value -= decayFactor * Time.fixedDeltaTime;
     }
 
     public override string ToString()
     {
-        return $"Pheromone Type: {Type}, Value: {Value}, Position: {Position}";
+        return $"Pheromone<{Type}>@{Position} = {Value}";
     }
 }

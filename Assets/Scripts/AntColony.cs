@@ -37,7 +37,7 @@ public class AntColony : MonoBehaviour
 
     private void SpawnAnt()
     {
-        Ant ant = Instantiate(AntPrefab, NestPos +Vector3.up + Random.insideUnitSphere * NestRadius, Quaternion.Euler(Random.insideUnitSphere), AntsObject);
+        Ant ant = Instantiate(AntPrefab, NestPos + Vector3.up, Quaternion.Euler(Random.insideUnitSphere), AntsObject);
         ant.Init(this);
         Ants.Add(ant);
     }

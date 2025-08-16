@@ -6,16 +6,14 @@ using System.Threading.Tasks;
 
 public class GoToNestState : StateBase
 {
-    PheromoneType pheroType;
-    public GoToNestState(Ant ant, PheromoneType pheroType) : base(ant)
+    public GoToNestState(Ant ant, PheromoneType type = PheromoneType.None) : base(ant, type)
     {
         // This state is used when the ant needs to return to the nest, either to deposit food or because it has no more tasks.
-        this.pheroType = pheroType;
     }
     public override void Enter()
     {
         ant.TargetPosition = ant.Colony.NestPos;
-        if (pheroType != PheromoneType.None)
+        if (pheroType == PheromoneType.Food)
         {
             ant.ResetPheromoneDepositRate(); // Reset pheromone deposit rate when entering this state
         }
@@ -47,8 +45,7 @@ public class GoToNestState : StateBase
         }
 
         ant.Move(PheromoneType.Home); // Go to nest
-        if (pheroType != PheromoneType.None)
-            ant.AddPheromone(pheroType);
+        ant.AddPheromone(pheroType);
     }
 
 }

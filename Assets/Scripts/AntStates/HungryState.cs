@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class HungryState : StateBase
 {
-    public HungryState(Ant ant) : base(ant) { }
+    public HungryState(Ant ant, PheromoneType type = PheromoneType.None) : base(ant, type) { }
     public override void Enter()
     {
     }
@@ -19,14 +19,14 @@ public class HungryState : StateBase
     {
         if (ant.IsFull())
         {
-            ant.ChangeState(new SeekingFoodState(ant));
+            ant.ChangeState(new SeekingFoodState(ant, (ant.IsInNest() ? PheromoneType.Home : PheromoneType.None)));
             return;
         }
 
         if (ant.IsCarrying)
         {
             ant.Eat(); // Eat the carried food mass
-            ant.ChangeState(new SeekingFoodState(ant));
+            ant.ChangeState(new SeekingFoodState(ant, PheromoneType.None)); // Go back to get more of the food you found
             return;
         }
 
@@ -43,10 +43,7 @@ public class HungryState : StateBase
             return;
         }
 
-        if (ant.Colony.HasFood())
-        {
-            ant.Eat();
-        }
+        ant.Eat();
     }
 }
 

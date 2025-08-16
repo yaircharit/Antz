@@ -15,13 +15,9 @@ public class Genome
     public float ViewAngle { get; private set; } // Angle in degrees
     public float HungerThreshold { get; private set; } // Threshold for hunger, when the ant needs to find food
 
-    // Pheromone properties (ACO configuration)
-
-    // Maybe devide to different classes for pheromone types? 1 class to inherit/contain from all types?
-    // Maybe will be useful for new mutations
 
     // Constructor to initialize the genome traits with default values or specified values
-    public Genome(float size = 1, float strength = 1.4f, float speed = 8, float viewDistance = 10, float viewAngle = 120, float hungerThreshold = 0.4f)
+    public Genome(float size = 1, float strength = 1.3f, float speed = 8, float viewDistance = 10, float viewAngle = 120, float hungerThreshold = 0.4f)
     {
         Size = size;
         Strength = strength;
@@ -43,6 +39,7 @@ public class Genome
         Size += (float)(rand.NextDouble() - 0.5);
         Strength += (float)(rand.NextDouble() - 0.5);
         Speed += (float)(rand.NextDouble() - 0.5);
+        HungerThreshold += (float)(rand.NextDouble() - 0.5);
     }
 }
 

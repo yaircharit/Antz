@@ -22,6 +22,8 @@ public class Ant : MovingEntity
 
     public void Init(AntColony antColony)
     {
+        ID = Count++; // Increment the static ant count
+
         base.Init();
         Colony = antColony;
         if (Colony == null)
@@ -29,34 +31,30 @@ public class Ant : MovingEntity
             Debug.LogError("No ColonyManagement found in scene!");
         }
 
-        ID = Count++; // Increment the static ant count
-        Name = $"{Name}_{ID}"; // Set the name based on the ID
     }
 
     void Start()
     {
-        ChangeState(new SeekingFoodState(this));
+        ChangeState(new SeekingFoodState(this, PheromoneType.Home));
     }
 
     void FixedUpdate()
     {
-        timeTraveled += Time.fixedDeltaTime;
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
-            transform.position = Colony.NestPos;
+            transform.position = Colony.NestPos + Vector3.up;
             ResetPheromoneDepositRate();
         }
 
         currentState?.Update();
 
         CheckVitals(); // Check the ant's vitals (health, energy, etc.) every frame
-        currentPheromoneDepositValue = ACO.Instace.ReducePheromone(timeTraveled,actualSpeed);
     }
 
     public void Move(PheromoneType type)
     {
-        Vector3 targetDirection;
+        Vector3 targetDirection = transform.forward;
         if (TargetPosition != Vector3.down && IsInView(TargetPosition))
         {
             targetDirection = GetDirectionTo(TargetPosition);
@@ -82,8 +80,12 @@ public class Ant : MovingEntity
 
     public void AddPheromone(PheromoneType type, float value)
     {
-        PheromoneMap.AddPheromone(transform.position, value, type);
-        //TODO: ReduceEnergy?
+        if (type != PheromoneType.None)
+        {
+            PheromoneMap.AddPheromone(transform.position, value, type);
+            ReducePheromone();
+            //TODO: ReduceEnergy?
+        }
     }
 
     public Pheromone tempPhero = null;
@@ -116,9 +118,19 @@ public class Ant : MovingEntity
 
     public void ResetPheromoneDepositRate()
     {
-        timeTraveled = 0; // Reset distance traveled
         currentPheromoneDepositValue = PheromoneMap.Instance.ACOConfig.DepositValue;// * genome.traits.Size;
     }
+
+    public void ReducePheromone()
+    {
+        currentPheromoneDepositValue -= (1 + actualSpeed) * ACO.Instace.DecayFactor * Time.deltaTime; // Decrease pheromone deposit rate over time
+    }
+
+    public bool LowOnPheromones()
+    {
+        return currentPheromoneDepositValue <= ACO.Instace.DecayFactor * 2; // Check if pheromone deposit rate is below the minimum threshold
+    }
+
     public void Eat(float amount = 1, float foodValue = 10)
     {
         if (IsCarrying)
@@ -139,13 +151,16 @@ public class Ant : MovingEntity
 
 
 
-    void OnDrawGizmosSelected()
+    protected override void OnDrawGizmosSelected()
     {
+        base.OnDrawGizmosSelected();
         if (tempPhero != null)
         {
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(tempPhero.Position, 0.9f);
-            Debug.Log($"Pheromone: {tempPhero} at {tempPhero.Position} with value {tempPhero.Value}");
         }
+
+        Debug.Log($"{this}, {tempPhero}");
+
     }
 }

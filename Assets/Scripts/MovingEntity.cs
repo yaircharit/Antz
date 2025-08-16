@@ -17,10 +17,10 @@ public abstract class MovingEntity : MonoBehaviour
     public float currentHealth; // Current health of the ant, can be used for health management
     public float maxEnergy = 100f; // Maximum energy of the ant
     public float currentEnergy; // Current energy of the ant, can be used for energy management
-    public float actualSpeed;
-    protected float timeTraveled = 0;
 
     public Genome genome { get; protected set; } // Genome of the ant, can be used for genetic algorithms or traits
+    public float actualSpeed;
+    public float actualStrength;
 
     public GameObject CarriedObj { get; protected set; }
     public float CarriedMass { get; protected set; } = 0f; // Mass of the carried object, used to calculate speed when carrying food
@@ -57,6 +57,9 @@ public abstract class MovingEntity : MonoBehaviour
         currentHealth = maxHealth; // Initialize current health
         currentEnergy = maxEnergy;
         actualSpeed = genome.Speed / genome.Size; // Initialize actual speed
+        actualStrength = genome.Strength * genome.Size;
+
+        transform.rotation = Quaternion.Euler(0, Random.value * 360f, 0); // Randomize initial rotation
     }
 
     public void ChangeState(StateBase newState)
@@ -153,10 +156,8 @@ public abstract class MovingEntity : MonoBehaviour
             CarriedMass = rb.mass;
             CarriedObj.GetComponent<Collider>().enabled = false;
 
-            // !! SPEED ADJUSTMENT !!
-            actualSpeed = Mathf.Min(genome.Speed / genome.Size,
-                (genome.Speed * CarrySpeedModifier * genome.Size * genome.Strength) / CarriedMass); // Adjust speed based on carried mass
-                                                                                      // Sizes cancel out
+            // !! SPEED ADJUSTMENT !!   normal speed * carrrying multiplier (1 is normal speed, 0.5 is half speed, etc.)
+            actualSpeed = ((genome.Speed / genome.Size) / Mathf.Max(1,CarriedMass/actualStrength*CarrySpeedModifier)); // Adjust speed based on carried mass
 
             return true;
         }
@@ -222,12 +223,12 @@ public abstract class MovingEntity : MonoBehaviour
 
     public float GetEnergyCost(string action)
     {
-        float modifiers = genome.Size * genome.ViewAngle / 360f * genome.ViewDistance * ACO.Instace.DetectionDistance;
+        float modifiers = 0.01f * genome.Size * genome.ViewAngle / 360f * genome.ViewDistance * ACO.Instace.DetectionDistance;
 
         return action.ToLower() switch
         {
-            "move" => 0.001f * modifiers * actualSpeed,// Energy cost for moving
-            "carry" => 0.001f * modifiers * (CarriedMass / genome.Strength) * actualSpeed,// Energy cost for carrying food
+            "move" => modifiers * actualSpeed,// Energy cost for moving
+            "carry" => modifiers * (CarriedMass / actualStrength) * actualSpeed,// Energy cost for carrying food
             _ => modifiers,// Default energy cost for other actions
         };
     }
@@ -289,7 +290,7 @@ public abstract class MovingEntity : MonoBehaviour
 
     public override string ToString()
     {
-        return $"MovingEntity at {transform.position}, {currentState.GetType().Name}";
+        return $"{Name}, {currentState}";
     }
 
 
@@ -298,7 +299,7 @@ public abstract class MovingEntity : MonoBehaviour
         currentState?.OnCollisionEnter(collision);
     }
 
-    void OnDrawGizmosSelected()
+    protected virtual void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, ACO.Instace.DetectionDistance);
