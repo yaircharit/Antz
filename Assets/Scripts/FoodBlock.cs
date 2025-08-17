@@ -21,7 +21,7 @@ public class FoodBlock : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (transform.position.y < -10f)
+        if (transform.position.y < -2f)
         {
             // Destroy the food block if it falls below a certain height
             Destroy(gameObject);

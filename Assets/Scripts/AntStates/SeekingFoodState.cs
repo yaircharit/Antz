@@ -5,7 +5,7 @@ public class SeekingFoodState : StateBase
 {
     public SeekingFoodState(Ant ant, PheromoneType type = PheromoneType.Home) : base(ant, type) { }
     public override void Enter() {
-    
+
     }
     public override void Exit() { }
     public override void Update()
@@ -15,19 +15,26 @@ public class SeekingFoodState : StateBase
             ant.ResetPheromoneDepositRate();
         }
 
-        ant.Target = ant.FindNearest(LayerMask.GetMask("Food"), ant.genome.ViewDistance);
+        ant.FindFood();
         ant.Move(PheromoneType.Food);
         ant.AddPheromone(pheroType);
 
-        if (ant.Target == null && ant.IsHungry() && ant.Colony.HasFood()
-            //|| ant.IsLowOnPheromones()
-            )
+        if (ant.FoundFood() && !ant.isStuck) return;
+
+
+        if (ant.IsHungry() && ant.Colony.HasFood())
         {
             ant.ChangeState(new HungryState(ant)); // No food found, go to eat
             return;
         }
 
-        if (ant.Target == null && ant.LowOnPheromones())
+        if (ant.isStuck)
+        {
+            ant.ChangeState(new GoToNestState(ant, PheromoneType.None)); // If stuck, go back to nest
+            return;
+        }
+
+        if (ant.LowOnPheromones())
         {
             ant.ChangeState(new GoToNestState(ant, PheromoneType.Home)); // No food found, go back to nest
             return;

@@ -258,7 +258,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   appleBlockPrefab: {fileID: 947474979183635148, guid: db60231b168fc80438fecf0107f8b385, type: 3}
-  appleSize: 7
+  appleSize: 5
   blockSpacing: 1
   spawnHeight: 5
   spawnAreaCenter: {x: 0, y: 0}
@@ -690,13 +690,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalRotation: {x: 0.2588191, y: 0, z: 0, w: 0.9659258}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1347579507}
-  m_LocalEulerAnglesHint: {x: 15, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: 0, z: 0}
 --- !u!1 &1330862183
 GameObject:
   m_ObjectHideFlags: 0
@@ -895,7 +895,7 @@ Transform:
   m_GameObject: {fileID: 1347579501}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 5, z: -10}
+  m_LocalPosition: {x: 0, y: 20, z: -55}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -949,9 +949,9 @@ MonoBehaviour:
   cellSize: 1
   PheromoneDepositValue: 1
   PheromoneDecayFactor: 0.01
-  PheromoneDetectionDistance: 4
-  ExplorationRate: 0.8
-  ExplorationAngle: 10
+  PheromoneDetectionDistance: 3
+  ExplorationRate: 0.5
+  ExplorationAngle: 15
 --- !u!1 &1834842690
 GameObject:
   m_ObjectHideFlags: 0

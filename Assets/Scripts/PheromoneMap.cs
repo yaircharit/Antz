@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 
 public class PheromoneMap : MonoBehaviour
@@ -53,11 +52,11 @@ public class PheromoneMap : MonoBehaviour
             pheromoneGrids[type][pos] = new Pheromone(type, amount, pos);
     }
 
-    public void RemovePhermone(Pheromone pheromone)
+    public void RemovePheromone(Pheromone pheromone)
     {
-        RemovePhermone(pheromone.Position, pheromone.Type);
+        RemovePheromone(pheromone.Position, pheromone.Type);
     }
-    public void RemovePhermone(Vector3 worldPos, PheromoneType type)
+    public void RemovePheromone(Vector3 worldPos, PheromoneType type)
     {
         Vector3Int gridPos = Round(worldPos);
         if (pheromoneGrids[type].ContainsKey(gridPos))
@@ -73,7 +72,7 @@ public class PheromoneMap : MonoBehaviour
         {
             foreach (var phero in grid.Values)
             {
-                if (phero.Decay(ACOConfig.DecayFactor) <= ACO.Instace.DecayFactor)
+                if (phero.Decay(ACOConfig.DecayFactor) < 0)
                 {
                     toRemove.Add(phero);
                 }
@@ -82,7 +81,7 @@ public class PheromoneMap : MonoBehaviour
 
         foreach (var pheromone in toRemove)
         {
-            RemovePhermone(pheromone);
+            RemovePheromone(pheromone);
         }
     }
 
@@ -92,17 +91,20 @@ public class PheromoneMap : MonoBehaviour
 
         Vector3Int gridPos = Round(position);
 
-        for (int i = -(int)range; i < range; i++)
+        for (int i = -(int)range; i <= range; i++)
         {
-            for (int j = -(int)range; j < range; j++)
+            for (int j = -(int)range; j <= range; j++)
             {
-                Vector3Int checkPos = new(gridPos.x + i, gridPos.y, gridPos.z + j);
-
-                if (gridPos != checkPos
-                    && Vector3.Distance(checkPos, position) <= range
-                    && pheromoneGrids[type].TryGetValue(checkPos, out Pheromone phero))
+                for (int k = -1; k <= 1; k++)
                 {
-                    res.Add(phero);
+
+                    Vector3Int checkPos = new(gridPos.x + i, gridPos.y + k, gridPos.z + j);
+
+                    if (pheromoneGrids[type].TryGetValue(checkPos, out Pheromone phero)
+                        && Vector3.Distance(checkPos, position) <= range)
+                    {
+                        res.Add(phero);
+                    }
                 }
             }
         }

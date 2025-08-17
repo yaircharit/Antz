@@ -17,7 +17,7 @@ public class Genome
 
 
     // Constructor to initialize the genome traits with default values or specified values
-    public Genome(float size = 1, float strength = 1.3f, float speed = 8, float viewDistance = 10, float viewAngle = 120, float hungerThreshold = 0.4f)
+    public Genome(float size = 1, float strength = 1.3f, float speed = 8, float viewDistance = 5, float viewAngle = 360, float hungerThreshold = 0.5f)
     {
         Size = size;
         Strength = strength;
@@ -39,7 +39,6 @@ public class Genome
         Size += (float)(rand.NextDouble() - 0.5);
         Strength += (float)(rand.NextDouble() - 0.5);
         Speed += (float)(rand.NextDouble() - 0.5);
-        HungerThreshold += (float)(rand.NextDouble() - 0.5);
     }
 }
 

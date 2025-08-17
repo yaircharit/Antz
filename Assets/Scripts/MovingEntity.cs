@@ -40,6 +40,7 @@ public abstract class MovingEntity : MonoBehaviour
     }
 
     public StateBase currentState;
+    protected Vector3 lastPosition;
 
     public virtual void Init()
     {
@@ -60,6 +61,7 @@ public abstract class MovingEntity : MonoBehaviour
         actualStrength = genome.Strength * genome.Size;
 
         transform.rotation = Quaternion.Euler(0, Random.value * 360f, 0); // Randomize initial rotation
+        lastPosition = transform.position; // Store the initial position as last position
     }
 
     public void ChangeState(StateBase newState)
@@ -93,12 +95,12 @@ public abstract class MovingEntity : MonoBehaviour
     }
     public Vector3 GetRandomDirection(Vector3 direction)
     {
-        return GetRandomDirection(direction, ACO.Instace.ExplorationAngle);
+        return GetRandomDirection(direction, ACO.Instance.ExplorationAngle);
     }
 
     public Vector3 GetRandomDirection()
     {
-        return GetRandomDirection(ACO.Instace.ExplorationAngle);
+        return GetRandomDirection(ACO.Instance.ExplorationAngle);
     }
 
     public Transform FindNearest(LayerMask layer, float range)
@@ -125,7 +127,7 @@ public abstract class MovingEntity : MonoBehaviour
 
     public float GetDistanceTo(Vector3 targetPosition)
     {
-        return Vector3.Distance(transform.position, targetPosition);
+        return (transform.position - targetPosition).magnitude;
     }
 
 
@@ -223,7 +225,7 @@ public abstract class MovingEntity : MonoBehaviour
 
     public float GetEnergyCost(string action)
     {
-        float modifiers = 0.01f * genome.Size * genome.ViewAngle / 360f * genome.ViewDistance * ACO.Instace.DetectionDistance;
+        float modifiers = 0.02f * genome.Size * genome.ViewAngle / 360f * genome.ViewDistance;
 
         return action.ToLower() switch
         {
@@ -235,7 +237,7 @@ public abstract class MovingEntity : MonoBehaviour
 
 
 
-    public bool IsFull(float precentage = 0.95f)
+    public bool IsFull(float precentage = 0.8f)
     {
         return currentEnergy >= maxEnergy * precentage;
     }
@@ -290,7 +292,7 @@ public abstract class MovingEntity : MonoBehaviour
 
     public override string ToString()
     {
-        return $"{Name}, {currentState}";
+        return $"{Name}<{currentState}>-{GetDistanceTo(lastPosition)}";
     }
 
 
@@ -302,7 +304,7 @@ public abstract class MovingEntity : MonoBehaviour
     protected virtual void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, ACO.Instace.DetectionDistance);
+        Gizmos.DrawWireSphere(transform.position, ACO.Instance.DetectionDistance);
         Gizmos.DrawLine(transform.position, transform.position + transform.forward);
         if (Target != null)
         {

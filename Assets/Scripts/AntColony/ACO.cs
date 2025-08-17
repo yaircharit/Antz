@@ -1,6 +1,6 @@
 ﻿public class ACO
 {
-    public static ACO Instace;
+    public static ACO Instance;
     public float DepositValue { get; private set; }
     public float DecayFactor { get; private set; } // How much pheromone decays per second
     public float DetectionDistance { get; private set; }
@@ -15,7 +15,7 @@
         ExplorationRate = explorationRate;
         ExplorationAngle = explorationAngle;
 
-        Instace = this;
+        Instance = this;
     }
 }
 

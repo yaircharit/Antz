@@ -17,6 +17,6 @@ public abstract class StateBase
 
     public override string ToString()
     {
-        return $"{GetType().Name}--{pheroType}";
+        return $"{GetType().Name}<{pheroType}>";
     }
 }

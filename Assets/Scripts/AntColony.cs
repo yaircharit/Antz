@@ -37,14 +37,14 @@ public class AntColony : MonoBehaviour
 
     private void SpawnAnt()
     {
-        Ant ant = Instantiate(AntPrefab, NestPos + Vector3.up, Quaternion.Euler(Random.insideUnitSphere), AntsObject);
+        Ant ant = Instantiate(AntPrefab,NestPos + Vector3.up, Quaternion.Euler(Random.insideUnitSphere), AntsObject);
         ant.Init(this);
         Ants.Add(ant);
     }
 
-    public bool IsInNest(Vector3 position)
+    public bool IsInNest(Vector3 position, float size =1)
     {
-        return Vector3.Distance(position, NestPos) <= NestRadius;
+        return Vector3.Distance(position, NestPos) <= NestRadius - size/2;
     }
 
     void OnDrawGizmosSelected()

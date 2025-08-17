@@ -39,7 +39,10 @@ public class HungryState : StateBase
 
         if (!ant.IsInNest())
         {
-            ant.ChangeState(new GoToNestState(ant, PheromoneType.Home)); // If not in nest, go to nest to eat
+            if (ant.FoundFood())
+                ant.ChangeState(new SeekingFoodState(ant));
+            else
+                ant.ChangeState(new GoToNestState(ant, PheromoneType.Home)); // If not in nest, go to nest to eat
             return;
         }
 
