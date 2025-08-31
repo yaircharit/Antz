@@ -28,13 +28,12 @@ public class FoodGenerator : MonoBehaviour
         // Create a parent GameObject for all food blocks
         foodParent = new GameObject("Apple");
         foodParent.transform.SetParent(transform);
-
-        SpawnAppleShape();
+        FoodBlock.count = 0;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightControl))
+        if (Input.GetKeyDown(KeyCode.RightControl) || FoodBlock.count == 0)
         {
             SpawnAppleShape();
         }

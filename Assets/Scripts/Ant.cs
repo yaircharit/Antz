@@ -89,7 +89,7 @@ public class Ant : MovingEntity
     {
         if (meshRenderer != null)
         {
-            meshRenderer.material.color = enable ? highlightColor : originalColor;
+            meshRenderer.material.color = enable ? highlightColor : baseColor;
         }
     }
 

@@ -31,8 +31,5 @@ public class FoodBlock : MonoBehaviour
     void OnDestroy()
     {
         count--; // Decrement the counter when a food block is destroyed
-
-        if (count == 0)
-            FoodGenerator.SpawnAppleShape(); // Spawn a new apple shape if no food blocks are left
     }
 }
