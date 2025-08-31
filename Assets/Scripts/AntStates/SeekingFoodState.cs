@@ -56,4 +56,9 @@ public class SeekingFoodState : StateBase
             return;
         }
     }
+
+    public override string ToString()
+    {
+        return "Seeking food";
+    }
 }

@@ -156,12 +156,13 @@ public abstract class MovingEntity : MonoBehaviour
         if (obj != null)
         {
             CarriedObj = obj.gameObject;
-            CarriedObj.transform.SetParent(gameObject.transform);
-            CarriedObj.transform.position = transform.position + Vector3.up * CarryHeight;
+            CarriedObj.GetComponent<Collider>().enabled = false;
             var rb = CarriedObj.GetComponent<Rigidbody>();
             rb.isKinematic = true;
+
+            CarriedObj.transform.SetParent(gameObject.transform);
+            CarriedObj.transform.position = transform.position + Vector3.up * CarryHeight;
             CarriedMass = rb.mass;
-            CarriedObj.GetComponent<Collider>().enabled = false;
 
             // !! SPEED ADJUSTMENT !!   normal speed * carrrying multiplier (1 is normal speed, 0.5 is half speed, etc.)
             actualSpeed = ((genome.Speed / genome.Size) / Mathf.Max(1,CarriedMass/actualStrength*CarrySpeedModifier)); // Adjust speed based on carried mass
@@ -267,10 +268,10 @@ public abstract class MovingEntity : MonoBehaviour
 
     private void Heal(float value)
     {
-        // TODO: add visual indication
         if (currentHealth < maxHealth)
         {
             currentHealth += value;
+            ReduceEnergy(value*5); // Healing costs energy
             if (currentHealth > maxHealth)
             {
                 currentHealth = maxHealth; // Cap health at maximum
@@ -315,9 +316,10 @@ public abstract class MovingEntity : MonoBehaviour
 
     public virtual string GetStatsString()
     {
-        return $"Health: {currentHealth:F1} / {maxHealth:F1}\n" +
+        return $"{currentState}\n" +
+            $"Health: {currentHealth:F1} / {maxHealth:F1}\n" +
             $"Energy: {currentEnergy:F1} / {maxEnergy:F1}\n" +
-            $"Carried: {CarriedMass:F1}";
+            (IsCarrying? $"Carrying: {CarriedMass:F1}" : "");
     }
 
     private void OnCollisionEnter(Collision collision)

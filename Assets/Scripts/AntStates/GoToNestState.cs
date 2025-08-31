@@ -59,5 +59,10 @@
             ant.RemovePheromone(PheromoneType.Food); // Clear food pheromone path if no food was found and ant went back
         }
     }
+
+    public override string ToString()
+    {
+        return "Going home";
+    }
 }
 

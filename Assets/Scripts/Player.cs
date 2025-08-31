@@ -46,7 +46,6 @@ public class Player : MonoBehaviour
         
         LockCursor();
         SetupPauseMenu();
-        SetPauseMenuActive(false);
     }
 
     private void Update()
@@ -82,6 +81,24 @@ public class Player : MonoBehaviour
             playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         }
         transform.Rotate(Vector3.up * mouseX);
+
+        // Clear ant selection if clicking on something other than an ant
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                Ant ant = hit.collider.GetComponentInParent<Ant>();
+                if (ant != null )
+                {
+                    return; // Clicked on an ant, do nothing
+                }
+                if (Ant.SelectedAnt != null)
+                {
+                    Ant.SelectedAnt.Deselect();
+                }
+            } 
+        }
     }
 
     private void FixedUpdate()
@@ -109,13 +126,11 @@ public class Player : MonoBehaviour
     private void LockCursor()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     private void UnlockCursor()
     {
         Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     private void SetupPauseMenu()

@@ -5,7 +5,7 @@ public class Ant : MovingEntity
     public override string Name { get; protected set; } = "Ant"; // Name of the ant, can be used for identification
     public new static int Count { get; protected set; } = 0; // Static counter to keep track of the number of ants
 
-    public static Ant SelectedAnt { get; private set; } = null;
+    public static Ant SelectedAnt { get; internal set; } = null;
     private PopupWindow statsUIInstance => Player.Instance.statsInfoInstance; // Assign in inspector to always-present window
 
     public PheromoneMap PheromoneMap { get; protected set; }
@@ -93,7 +93,7 @@ public class Ant : MovingEntity
         }
     }
 
-    private void Deselect()
+    public void Deselect()
     {
         Highlight(false);
         if (SelectedAnt == this)
