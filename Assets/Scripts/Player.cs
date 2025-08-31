@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private GameObject pauseMenuPrefab;
+    [SerializeField] public PopupWindow statsInfoInstance;
     private GameObject pauseMenuInstance;
     public TMP_Text foodScoreText;
 
@@ -42,6 +43,7 @@ public class Player : MonoBehaviour
         {
             Debug.LogError("No Camera found as child of player for first person view.");
         }
+        
         LockCursor();
         SetupPauseMenu();
         SetPauseMenuActive(false);

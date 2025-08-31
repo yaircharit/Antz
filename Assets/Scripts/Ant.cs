@@ -5,6 +5,8 @@ public class Ant : MovingEntity
     public override string Name { get; protected set; } = "Ant"; // Name of the ant, can be used for identification
     public new static int Count { get; protected set; } = 0; // Static counter to keep track of the number of ants
 
+    public static Ant SelectedAnt { get; private set; } = null;
+    private PopupWindow statsUIInstance => Player.Instance.statsInfoInstance; // Assign in inspector to always-present window
 
     public PheromoneMap PheromoneMap { get; protected set; }
     public Pheromone currentPhero = null;
@@ -20,6 +22,8 @@ public class Ant : MovingEntity
         {
             Debug.LogError("No PheromoneMap found in scene!");
         }
+        meshRenderer = GetComponentInChildren<MeshRenderer>();
+        meshRenderer.material.color = baseColor;
     }
 
     public void Init(AntColony antColony)
@@ -41,21 +45,89 @@ public class Ant : MovingEntity
         ChangeState(new SeekingFoodState(this, PheromoneType.Home));
     }
 
+    public float updateInterval = 0.5f; // Interval in seconds to update the ant's state
+    private float timeSinceLastUpdate = 0f;
     void FixedUpdate()
     {
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
-            transform.position = Colony.NestPos + Vector3.up;
+            transform.position = Colony.NestPos + Vector3.up * 3;
             ResetPheromoneDepositRate();
         }
 
         currentState?.Update();
 
+        // Check if it's time to update the ant's vitals
+        if (Time.time - timeSinceLastUpdate < updateInterval) return;
+        timeSinceLastUpdate = Time.time;
+
         CheckVitals(); // Check the ant's vitals (health, energy, etc.) every frame
     }
 
+    private void OnMouseDown()
+    {
+        // Deselect previous ant
+        if (SelectedAnt != null && SelectedAnt != this)
+        {
+            SelectedAnt.Deselect();
+        }
+        SelectedAnt = this;
+        UpdateStatsUI();
+        Highlight(true);
+        statsUIInstance.Active = true;
+    }
+
+    private void UpdateStatsUI()
+    {
+        if (statsUIInstance == null) return;
+        statsUIInstance.Header = Name;
+        statsUIInstance.Body = GetStatsString();
+    }
+
+    private void Highlight(bool enable)
+    {
+        if (meshRenderer != null)
+        {
+            meshRenderer.material.color = enable ? highlightColor : originalColor;
+        }
+    }
+
+    private void Deselect()
+    {
+        Highlight(false);
+        if (SelectedAnt == this)
+        {
+            SelectedAnt = null;
+            statsUIInstance.Active = false;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        Deselect();
+    }
+
+    void Update()
+    {
+        if (SelectedAnt == this)
+        {
+            UpdateStatsUIAndLine();
+        }
+    }
+
+    private void UpdateStatsUIAndLine()
+    {
+        if (statsUIInstance != null && SelectedAnt == this)
+        {
+            statsUIInstance.Header = Name;
+            statsUIInstance.Body = GetStatsString();
+        }
+    }
+
+
     private float lastStuckTime = 0f; // Timer to check if the ant is stuck
+
     public void Move(PheromoneType type)
     {
         Vector3 targetDirection = transform.forward;
@@ -171,9 +243,6 @@ public class Ant : MovingEntity
         }
     }
 
-
-
-
     protected override void OnDrawGizmosSelected()
     {
         base.OnDrawGizmosSelected();
@@ -182,7 +251,7 @@ public class Ant : MovingEntity
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(currentPhero.Position, 0.9f);
         }
-         
+
         Debug.Log($"{this}, {currentPhero}");
 
     }
@@ -203,6 +272,6 @@ public class Ant : MovingEntity
     public bool FoundFood()
     {
         FindFood();
-        return Target != null || FoundPheromone(PheromoneType.Food) ;
+        return Target != null || FoundPheromone(PheromoneType.Food);
     }
 }

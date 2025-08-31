@@ -42,6 +42,11 @@ public abstract class MovingEntity : MonoBehaviour
     public StateBase currentState;
     protected Vector3 lastPosition;
 
+    protected MeshRenderer meshRenderer;
+    public Color baseColor = Color.black;
+    public Color highlightColor = Color.yellow;
+    public Color damageColor = Color.red;
+
     public virtual void Init()
     {
 
@@ -225,7 +230,7 @@ public abstract class MovingEntity : MonoBehaviour
 
     public float GetEnergyCost(string action)
     {
-        float modifiers = 0.02f * genome.Size * genome.ViewAngle / 360f * genome.ViewDistance;
+        float modifiers = 0.03f * genome.Size * genome.ViewAngle / 360f * genome.ViewDistance;
 
         return action.ToLower() switch
         {
@@ -263,11 +268,19 @@ public abstract class MovingEntity : MonoBehaviour
     private void Heal(float value)
     {
         // TODO: add visual indication
-        // TODO: heal only if needed ( < maxHealth )
-        currentHealth += value;
-        if (currentHealth > maxHealth)
+        if (currentHealth < maxHealth)
         {
-            currentHealth = maxHealth; // Cap health at maximum
+            currentHealth += value;
+            if (currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth; // Cap health at maximum
+            }
+            // Visual indication: briefly change color to highlightColor
+            if (meshRenderer != null)
+            {
+                meshRenderer.material.color = Color.Lerp(baseColor, Color.green, 0.5f);
+                Invoke("ResetColor", 0.2f);
+            }
         }
     }
 
@@ -281,7 +294,12 @@ public abstract class MovingEntity : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        //TODO: visual indicator
+        meshRenderer.material.color = Color.Lerp(baseColor, damageColor, 0.5f);
+        Invoke("ResetColor", 0.2f);
+    }
+    private void ResetColor()
+    {
+        meshRenderer.material.color = baseColor;
     }
 
     public bool IsDead()
@@ -295,6 +313,12 @@ public abstract class MovingEntity : MonoBehaviour
         return $"{Name}<{currentState}>-{GetDistanceTo(lastPosition)}";
     }
 
+    public virtual string GetStatsString()
+    {
+        return $"Health: {currentHealth:F1} / {maxHealth:F1}\n" +
+            $"Energy: {currentEnergy:F1} / {maxEnergy:F1}\n" +
+            $"Carried: {CarriedMass:F1}";
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
