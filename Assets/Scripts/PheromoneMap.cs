@@ -158,7 +158,7 @@ public class PheromoneMap : MonoBehaviour
             foreach (var phero in grid.Values)
             {
                 Gizmos.color = phero.Color;
-                Gizmos.DrawCube(phero.Position + new Vector3(0, 0.01f, 0), new Vector3(cellSize * 0.9f, 0.01f, cellSize * 0.9f));
+                Gizmos.DrawCube(phero.Position, new Vector3(cellSize , 0.01f, cellSize));
             }
         }
     }

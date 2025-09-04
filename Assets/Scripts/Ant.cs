@@ -53,6 +53,7 @@ public class Ant : MovingEntity
         {
             // Reset ant position if it falls below a certain height
             transform.position = Colony.NestPos + Vector3.up * 3;
+            transform.rotation = Quaternion.Euler(0,0,0);
             ResetPheromoneDepositRate();
         }
 
@@ -142,13 +143,12 @@ public class Ant : MovingEntity
             targetDirection = GetPheromoneDirections(type);
         }
 
-        targetDirection.y = transform.forward.y;
         MoveInDirection(targetDirection, actualSpeed);
         ReduceEnergy(GetEnergyCost((IsCarrying) ? "Carry" : "Move") * Time.fixedDeltaTime); // Decrease energy with each movement
 
         if (Time.time - lastStuckTime > 1f)
         {
-            isStuck = GetDistanceTo(lastPosition) < 0.1f * actualSpeed;
+            isStuck = GetDistanceTo(lastPosition) < 0.01f * actualSpeed;
             lastStuckTime = Time.time; // Update last stuck time
             lastPosition = transform.position; // Update last position
         }
@@ -205,6 +205,7 @@ public class Ant : MovingEntity
         {
             // No pheromone found, wander randomly
             res = GetRandomDirection();
+            res.y = 0;
         }
 
         return res;

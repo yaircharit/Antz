@@ -93,11 +93,11 @@ public class Player : MonoBehaviour
                 {
                     return; // Clicked on an ant, do nothing
                 }
-                if (Ant.SelectedAnt != null)
-                {
-                    Ant.SelectedAnt.Deselect();
-                }
-            } 
+            }
+            if (Ant.SelectedAnt != null)
+            {
+                Ant.SelectedAnt.Deselect();
+            }
         }
     }
 

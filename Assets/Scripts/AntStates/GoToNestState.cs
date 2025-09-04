@@ -45,13 +45,15 @@
         ant.TargetPosition = ant.Colony.NestPos;
 
         ant.Move(PheromoneType.Home); // Go to nest
-        ant.AddPheromone(pheroType);
 
         if (pheroType != PheromoneType.None && !ant.IsCarrying && ant.FoundFood()) //TODO: FoundFood sets target away from nest
         {
             ant.ChangeState(new SeekingFoodState(ant)); // If not carrying food, seek food
             return;
         }
+
+        ant.AddPheromone(pheroType);
+
 
         if (pheroType == PheromoneType.None)
         {
