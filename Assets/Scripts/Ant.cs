@@ -6,7 +6,6 @@ public class Ant : MovingEntity
     public new static int Count { get; protected set; } = 0; // Static counter to keep track of the number of ants
 
     public static Ant SelectedAnt { get; internal set; } = null;
-    private PopupWindow statsUIInstance => Player.Instance.statsInfoInstance; // Assign in inspector to always-present window
 
     public PheromoneMap PheromoneMap { get; protected set; }
     public Pheromone currentPhero = null;
@@ -24,6 +23,9 @@ public class Ant : MovingEntity
         }
         meshRenderer = GetComponentInChildren<MeshRenderer>();
         meshRenderer.material.color = baseColor;
+
+        OnSelected += Select; //TODO: Actually use events
+        OnDeselected += Deselect;
     }
 
     public void Init(AntColony antColony)
@@ -53,7 +55,7 @@ public class Ant : MovingEntity
         {
             // Reset ant position if it falls below a certain height
             transform.position = Colony.NestPos + Vector3.up * 3;
-            transform.rotation = Quaternion.Euler(0,0,0);
+            transform.rotation = Quaternion.Euler(0, 0, 0);
             ResetPheromoneDepositRate();
         }
 
@@ -68,62 +70,25 @@ public class Ant : MovingEntity
 
     private void OnMouseDown()
     {
+        Select();
+    }
+
+    public void Select()
+    {
         // Deselect previous ant
         if (SelectedAnt != null && SelectedAnt != this)
         {
             SelectedAnt.Deselect();
         }
         SelectedAnt = this;
-        UpdateStatsUI();
         Highlight(true);
-        statsUIInstance.Active = true;
     }
 
-    private void UpdateStatsUI()
-    {
-        if (statsUIInstance == null) return;
-        statsUIInstance.Header = Name;
-        statsUIInstance.Body = GetStatsString();
-    }
-
-    private void Highlight(bool enable)
-    {
-        if (meshRenderer != null)
-        {
-            meshRenderer.material.color = enable ? highlightColor : baseColor;
-        }
-    }
 
     public void Deselect()
     {
         Highlight(false);
-        if (SelectedAnt == this)
-        {
-            SelectedAnt = null;
-            statsUIInstance.Active = false;
-        }
-    }
-
-    private void OnDestroy()
-    {
-        Deselect();
-    }
-
-    void Update()
-    {
-        if (SelectedAnt == this)
-        {
-            UpdateStatsUIAndLine();
-        }
-    }
-
-    private void UpdateStatsUIAndLine()
-    {
-        if (statsUIInstance != null && SelectedAnt == this)
-        {
-            statsUIInstance.Header = Name;
-            statsUIInstance.Body = GetStatsString();
-        }
+        SelectedAnt = null;
     }
 
 

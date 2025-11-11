@@ -9,17 +9,23 @@ public class Player : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float mouseSensitivity = 2f;
     [SerializeField] private float sprintMultiplier = 2f;
+    [SerializeField] private float minPitch = 10f;   // how far down camera can tilt
+    [SerializeField] private float maxPitch = 80f;   // how far up camera can tilt
 
     [Header("UI")]
     [SerializeField] private GameObject pauseMenuPrefab;
-    [SerializeField] public PopupWindow statsInfoInstance;
     private GameObject pauseMenuInstance;
     public TMP_Text foodScoreText;
 
     private Rigidbody rb;
     private Camera playerCamera;
-    private float xRotation = 0f;
     private bool isPaused = false;
+
+    public float rotationSpeed = 30f;
+    private bool isDragging = false;
+    private Vector3 lastMousePosition;
+    private float yaw = 0f;
+    private float pitch = 45f; // default downward tilt
 
     private void Awake()
     {
@@ -43,8 +49,11 @@ public class Player : MonoBehaviour
         {
             Debug.LogError("No Camera found as child of player for first person view.");
         }
-        
-        LockCursor();
+
+        Vector3 euler = transform.eulerAngles;
+        yaw = euler.y;
+        pitch = euler.x;
+
         SetupPauseMenu();
     }
 
@@ -54,14 +63,12 @@ public class Player : MonoBehaviour
         {
             if (!isPaused)
             {
-                UnlockCursor();
                 SetPauseMenuActive(true);
                 Time.timeScale = 0f;
                 isPaused = true;
             }
             else
             {
-                LockCursor();
                 SetPauseMenuActive(false);
                 Time.timeScale = 1f;
                 isPaused = false;
@@ -70,17 +77,32 @@ public class Player : MonoBehaviour
 
         if (isPaused) return;
 
-        // Mouse look
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        if (playerCamera != null)
+        // Start drag with right click (or middle click)
+        if (Input.GetMouseButtonDown(1))
         {
-            playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            isDragging = true;
+            lastMousePosition = Input.mousePosition;
         }
-        transform.Rotate(Vector3.up * mouseX);
+
+        if (Input.GetMouseButtonUp(1))
+        {
+            isDragging = false;
+        }
+
+        if (isDragging)
+        {
+            Vector3 delta = Input.mousePosition - lastMousePosition;
+
+            yaw += delta.x * rotationSpeed * Time.deltaTime;
+            pitch -= delta.y * rotationSpeed * Time.deltaTime;
+
+            // Clamp vertical rotation
+            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+
+            transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+
+            lastMousePosition = Input.mousePosition;
+        }
 
         // Clear ant selection if clicking on something other than an ant
         if (Input.GetMouseButtonDown(0))

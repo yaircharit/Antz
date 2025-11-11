@@ -47,6 +47,13 @@ public abstract class MovingEntity : MonoBehaviour
     public Color highlightColor = Color.yellow;
     public Color damageColor = Color.red;
 
+    public event System.Action OnSelected;
+    public event System.Action OnDeselected;
+    public event System.Action OnDestroyed;
+
+    public event System.Action<float> OnHealthChanged;
+    public event System.Action<float> OnEnergyChanged;
+
     public virtual void Init()
     {
 
@@ -135,7 +142,6 @@ public abstract class MovingEntity : MonoBehaviour
         return (transform.position - targetPosition).magnitude;
     }
 
-
     public bool IsInRange(Vector3 target, float range)
     {
         return GetDistanceTo(target) <= range;
@@ -213,6 +219,7 @@ public abstract class MovingEntity : MonoBehaviour
         {
             currentEnergy = 0; // Ensure energy doesn't go below zero
         }
+        OnEnergyChanged?.Invoke(currentEnergy);
     }
 
     public void AddEnergy(float amount)
@@ -222,6 +229,7 @@ public abstract class MovingEntity : MonoBehaviour
         {
             currentEnergy = maxEnergy; // Cap energy at maximum
         }
+        OnEnergyChanged?.Invoke(currentEnergy);
     }
 
     public bool IsHungry()
@@ -240,7 +248,6 @@ public abstract class MovingEntity : MonoBehaviour
             _ => modifiers,// Default energy cost for other actions
         };
     }
-
 
 
     public bool IsFull(float precentage = 0.8f)
@@ -282,6 +289,7 @@ public abstract class MovingEntity : MonoBehaviour
                 meshRenderer.material.color = Color.Lerp(baseColor, Color.green, 0.5f);
                 Invoke("ResetColor", 0.2f);
             }
+            OnHealthChanged?.Invoke(currentHealth);
         }
     }
 
@@ -295,8 +303,9 @@ public abstract class MovingEntity : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
+        OnHealthChanged?.Invoke(currentHealth);
         meshRenderer.material.color = Color.Lerp(baseColor, damageColor, 0.5f);
-        Invoke("ResetColor", 0.2f);
+        Invoke(nameof(ResetColor), 0.2f);
     }
     private void ResetColor()
     {
@@ -314,12 +323,12 @@ public abstract class MovingEntity : MonoBehaviour
         return $"{Name}<{currentState}>-{GetDistanceTo(lastPosition)}";
     }
 
-    public virtual string GetStatsString()
+    public void Highlight(bool enable)
     {
-        return $"{currentState}\n" +
-            $"Health: {currentHealth:F1} / {maxHealth:F1}\n" +
-            $"Energy: {currentEnergy:F1} / {maxEnergy:F1}\n" +
-            (IsCarrying? $"Carrying: {CarriedMass:F1}" : "");
+        if (meshRenderer != null)
+        {
+            meshRenderer.material.color = enable ? highlightColor : baseColor;
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -342,5 +351,11 @@ public abstract class MovingEntity : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(TargetPosition, 1f);
         }
+    }
+
+    private void OnDestroy()
+    {
+        OnDeselected?.Invoke();
+        OnDestroyed?.Invoke();
     }
 }

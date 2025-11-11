@@ -1,3 +1,4 @@
+using Assets.Scripts.Interface;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,7 @@ public class AntColony : MonoBehaviour
 
     private Transform AntsObject;
     public List<Ant> Ants { get; private set; } = new List<Ant>();
+    public AntsListWindow antsListWindow; // Reference to the AntsListWindow UI component
 
     public float foodScore = 0; // Score for the amount of food collected
 
@@ -40,6 +42,8 @@ public class AntColony : MonoBehaviour
         Ant ant = Instantiate(AntPrefab,NestPos + Vector3.up, Quaternion.Euler(Random.insideUnitSphere), AntsObject);
         ant.Init(this);
         Ants.Add(ant);
+
+        antsListWindow.AddAnt(ant);
     }
 
     public bool IsInNest(Vector3 position, float size =1)
