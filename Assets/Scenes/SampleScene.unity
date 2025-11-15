@@ -1259,13 +1259,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 10
-  mouseSensitivity: 2
+  mouseSensitivity: 30
   sprintMultiplier: 2
   minPitch: 10
   maxPitch: 80
   pauseMenuPrefab: {fileID: 2506749748025789979, guid: 79186f2e7e15a2a4184b472afc0c6f9b, type: 3}
   foodScoreText: {fileID: 561977220}
-  rotationSpeed: 30
 --- !u!54 &1347579503
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1432,6 +1431,11 @@ MonoBehaviour:
   PheromoneDetectionDistance: 3
   ExplorationRate: 0.5
   ExplorationAngle: 15
+  PheromoneColors:
+  - {r: 0, g: 0, b: 0, a: 0}
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &1772507415
 GameObject:
   m_ObjectHideFlags: 0

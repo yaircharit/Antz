@@ -27,15 +27,15 @@ namespace Assets.Scripts.Interface
             energyBar.maxValue = ant.maxEnergy;
             energyBar.value = ant.currentEnergy;
 
-            ant.OnEnergyChanged += UpdateEnergy;
+            ant.OnEnergyChanged += (_) => UpdateEnergy(ant.currentEnergy);
 
-            ant.OnDamageTaken += (x) => UpdateHealth(ant.currentHealth);
-            ant.OnDamageTaken += (x) => FlashColor(ant.damageColor, ant.damageFlashDuration);
+            ant.OnDamageTaken += (_) => UpdateHealth(ant.currentHealth);
+            ant.OnDamageTaken += (_) => StartCoroutine(FlashColor(MovingEntity.damageColor, MovingEntity.damageFlashDuration));
 
-            ant.OnHealed += (x) => UpdateHealth(ant.currentHealth);
-            ant.OnHealed += (x) => FlashColor(ant.healColor, ant.healFlashDuration);
-            
-            ant.OnSelected += () => Select(ant.highlightColor);
+            ant.OnHealed += (_) => UpdateHealth(ant.currentHealth);
+            ant.OnHealed += (_) => StartCoroutine(FlashColor(MovingEntity.healColor, MovingEntity.healFlashDuration));
+
+            ant.OnSelected += () => Select(MovingEntity.highlightColor);
             ant.OnDeselected += () => Deselect(Color.white);
             ant.OnDestroyed += () => Destroy(gameObject);
             ant.OnStateChanged += (state) =>
@@ -64,12 +64,12 @@ namespace Assets.Scripts.Interface
             background.color = baseColor;
         }
 
-        public IEnumerable FlashColor(Color color, float duration)
+        public IEnumerator FlashColor(Color color, float duration)
         {
-            Color prevColor = background.material.color;
-            background.material.color = Color.Lerp(prevColor, color, 0.5f);
+            Color prevColor = background.color;
+            background.color = color;
             yield return new WaitForSeconds(duration);
-            background.material.color = prevColor;
+            background.color = prevColor;
         }
 
         public void ResetColor()

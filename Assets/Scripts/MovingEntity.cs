@@ -3,7 +3,6 @@ using UnityEngine;
 
 public abstract class MovingEntity : MonoBehaviour
 {
-
     public virtual string Name { get; protected set; } = "MovingEntity"; // Name of the ant, can be used for identification
     public int ID { get; protected set; } = -1; // Unique ID for the ant, can be used for identification
     public static int Count { get; protected set; } = 0; // Static counter to keep track of the number of ants
@@ -44,13 +43,15 @@ public abstract class MovingEntity : MonoBehaviour
     protected Vector3 lastPosition;
 
     protected MeshRenderer meshRenderer;
-    public Color baseColor = Color.black;
-    public Color highlightColor = Color.yellow;
-    public Color damageColor = Color.red;
-    public float damageFlashDuration = 0.2f;
-    public Color healColor = Color.green;
-    public float healFlashDuration = 0.3f;
+    //TODO: Move these to a config file or somethin, ScriptableObject maybe?
+    public static Color baseColor = Color.black;
+    public static Color highlightColor = Color.yellow;
+    public static Color damageColor = Color.red;
+    public static float damageFlashDuration = 0.5f;
+    public static Color healColor = Color.green;
+    public static float healFlashDuration = 0.5f;
 
+    public bool isSelected = false;
     public event System.Action OnSelected;
     public event System.Action OnDeselected;
     public event System.Action OnDestroyed;
@@ -63,16 +64,14 @@ public abstract class MovingEntity : MonoBehaviour
 
     public virtual void Init()
     {
-
         ID = Count++; // Increment the static ant count
         Name = $"{Name}_{ID}"; // Set the name based on the ID
 
-        OnDamageTaken += (x) => FlashColor(damageColor, 0.2f);
+        OnDamageTaken += (_) => StartCoroutine(FlashColor(damageColor, damageFlashDuration));
         OnDamageTaken += TakeDamage;
 
-        OnHealed += (x) => FlashColor(healColor, 0.2f);
+        OnHealed += (_) => StartCoroutine(FlashColor(healColor, healFlashDuration));
         OnHealed += Heal;
-        OnHealed += (value) => ReduceEnergy(value * 5); // Healing costs energy
 
         genome = new Genome(); // Initialize genome with default values
         genome.Mutate(true); // Mutate the genome to get random traits
@@ -105,6 +104,7 @@ public abstract class MovingEntity : MonoBehaviour
         transform.forward = targetDirection;
         var distance = speed * Time.fixedDeltaTime * targetDirection;
         transform.position += distance;
+
         ReduceEnergy(GetEnergyCost() * Time.fixedDeltaTime); // Decrease energy with each movement
     }
 
@@ -172,7 +172,6 @@ public abstract class MovingEntity : MonoBehaviour
     {
         return IsInRange(target, genome["ViewDistance"].Value) && Vector3.Angle(transform.forward, GetDirectionTo(target)) <= genome["ViewAngle"].Value / 2;
     }
-
 
     public bool Pickup(Transform obj)
     {
@@ -264,7 +263,6 @@ public abstract class MovingEntity : MonoBehaviour
         //TODO: view angle should raise energy cost, not lower it.
         float modifiers = 0.01f * genome["Size"].Value * genome["ViewAngle"].Value / 90f * genome["ViewDistance"].Value;
 
-
         return modifiers * actualSpeed // Base energy cost for moving
         * (IsCarrying ? (CarriedMass / actualStrength) : 1);// Energy cost multiplier for carrying food
     }
@@ -274,9 +272,9 @@ public abstract class MovingEntity : MonoBehaviour
         if (currentEnergy == 0)
         {
             // Set on Hunger?
-            OnDamageTaken?.Invoke(10);
+            OnDamageTaken?.Invoke(GetEnergyCost());
         }
-        else if (!IsHungry)
+        else if (currentHealth < maxHealth && !IsHungry)
         {
             // Set on Hunger?
             OnHealed?.Invoke(1);
@@ -296,6 +294,7 @@ public abstract class MovingEntity : MonoBehaviour
             {
                 currentHealth = maxHealth; // Cap health at maximum
             }
+            ReduceEnergy(value * 5); // Healing costs energy
         }
     }
 
@@ -311,7 +310,7 @@ public abstract class MovingEntity : MonoBehaviour
         currentHealth -= amount;
     }
 
-    public IEnumerable FlashColor(Color color, float duration)
+    public IEnumerator FlashColor(Color color, float duration)
     {
         if (meshRenderer != null)
         {
