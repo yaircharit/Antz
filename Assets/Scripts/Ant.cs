@@ -121,7 +121,7 @@ public class Ant : MovingEntity
 
     public bool IsInNest()
     {
-        return Colony != null && Colony.IsInNest(transform.position, genome.Size);
+        return Colony != null && Colony.IsInNest(transform.position, genome["Size"].Value);
     }
 
     public void AddPheromone(PheromoneType type)
@@ -232,7 +232,7 @@ public class Ant : MovingEntity
     public void FindFood()
     {
         // Check if the ant has found food within its view distance
-        Target = FindNearest(LayerMask.GetMask("Food"), genome.ViewDistance);
+        Target = FindNearest(LayerMask.GetMask("Food"), genome["ViewDistance"].Value);
     }
 
     public bool FoundFood()

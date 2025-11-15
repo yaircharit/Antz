@@ -61,16 +61,18 @@ public abstract class MovingEntity : MonoBehaviour
         Name = $"{Name}_{ID}"; // Set the name based on the ID
 
         genome = new Genome(); // Initialize genome with default values
-        genome.Mutate(); // Mutate the genome to get random traits
+        genome.Mutate(true); // Mutate the genome to get random traits
 
-        maxHealth = 100f * genome.Size; // Set maximum health based on size trait
-        maxEnergy = 100f * genome.Size; // Set maximum energy based on size trait
-        transform.localScale = Vector3.one * genome.Size; // Set the scale of the ant based on size trait
+        float size = genome["Size"].Value;
+
+        maxHealth = 100f * size; // Set maximum health based on size trait
+        maxEnergy = 100f * size; // Set maximum energy based on size trait
+        transform.localScale = Vector3.one * size; // Set the scale of the ant based on size trait
 
         currentHealth = maxHealth; // Initialize current health
         currentEnergy = maxEnergy;
-        actualSpeed = genome.Speed / genome.Size; // Initialize actual speed
-        actualStrength = genome.Strength * genome.Size;
+        actualSpeed = genome["Speed"].Value / size; // Initialize actual speed
+        actualStrength = genome["Strength"].Value * size;
 
         transform.rotation = Quaternion.Euler(0, Random.value * 360f, 0); // Randomize initial rotation
         lastPosition = transform.position; // Store the initial position as last position
@@ -153,7 +155,7 @@ public abstract class MovingEntity : MonoBehaviour
     }
     public bool IsInView(Vector3 target)
     {
-        return IsInRange(target, genome.ViewDistance) && Vector3.Angle(transform.forward, GetDirectionTo(target)) <= genome.ViewAngle / 2;
+        return IsInRange(target, genome["ViewDistance"].Value) && Vector3.Angle(transform.forward, GetDirectionTo(target)) <= genome["ViewAngle"].Value / 2;
     }
 
 
@@ -171,7 +173,7 @@ public abstract class MovingEntity : MonoBehaviour
             CarriedMass = rb.mass;
 
             // !! SPEED ADJUSTMENT !!   normal speed * carrrying multiplier (1 is normal speed, 0.5 is half speed, etc.)
-            actualSpeed = ((genome.Speed / genome.Size) / Mathf.Max(1,CarriedMass/actualStrength*CarrySpeedModifier)); // Adjust speed based on carried mass
+            actualSpeed = ((genome["Speed"].Value / genome["Size"].Value) / Mathf.Max(1, CarriedMass / actualStrength * CarrySpeedModifier)); // Adjust speed based on carried mass
 
             return true;
         }
@@ -208,7 +210,7 @@ public abstract class MovingEntity : MonoBehaviour
             CarriedMass = 0f;
 
             // !! SPEED ADJUSTMENT !!
-            actualSpeed = genome.Speed / genome.Size; // Reset speed to normal when not carrying anything
+            actualSpeed = genome["Speed"].Value / genome["Size"].Value; // Reset speed to normal when not carrying anything
         }
     }
 
@@ -234,12 +236,13 @@ public abstract class MovingEntity : MonoBehaviour
 
     public bool IsHungry()
     {
-        return currentEnergy <= maxEnergy * genome.HungerThreshold; // Check if the ant is hungry based on the hunger threshold defined in genome traits
+        return currentEnergy <= maxEnergy * genome["HungerThreshold"].Value; // Check if the ant is hungry based on the hunger threshold defined in genome traits
     }
 
     public float GetEnergyCost(string action)
     {
-        float modifiers = 0.03f * genome.Size * genome.ViewAngle / 360f * genome.ViewDistance;
+        //TODO: view angle should raise energy cost, not lower it.
+        float modifiers = 0.03f * genome["Size"].Value * genome["ViewAngle"].Value / 360f * genome["ViewDistance"].Value;
 
         return action.ToLower() switch
         {
