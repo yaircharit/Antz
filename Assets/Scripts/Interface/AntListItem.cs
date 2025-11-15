@@ -28,16 +28,19 @@ namespace Assets.Scripts.Interface
             energyBar.value = ant.currentEnergy;
 
             ant.OnEnergyChanged += UpdateEnergy;
-            ant.OnDamageTaken += UpdateHealth;
+
+            ant.OnDamageTaken += (x) => UpdateHealth(ant.currentHealth);
             ant.OnDamageTaken += (x) => FlashColor(ant.damageColor, ant.damageFlashDuration);
-            ant.OnHealed += UpdateHealth;
+
+            ant.OnHealed += (x) => UpdateHealth(ant.currentHealth);
             ant.OnHealed += (x) => FlashColor(ant.healColor, ant.healFlashDuration);
+            
             ant.OnSelected += () => Select(ant.highlightColor);
             ant.OnDeselected += () => Deselect(Color.white);
             ant.OnDestroyed += () => Destroy(gameObject);
             ant.OnStateChanged += (state) =>
             {
-                antStatus.color = state.stateColor;
+                antStatus.color = state.StateColor;
             };
             OnSelect += ant.RaiseOnSelected;
         }

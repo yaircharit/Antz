@@ -44,7 +44,7 @@ public class Ant : MovingEntity
 
     void Start()
     {
-        ChangeState(new SeekingFoodState(this, PheromoneType.Home));
+        ChangeState(new ExploreState(this, PheromoneType.Home));
     }
 
     public float updateInterval = 0.5f; // Interval in seconds to update the ant's state
@@ -54,12 +54,11 @@ public class Ant : MovingEntity
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
-            transform.position = Colony.NestPos + Vector3.up * 3;
-            transform.rotation = Quaternion.Euler(0, 0, 0);
+            transform.SetPositionAndRotation(Colony.NestPos + Vector3.up * 3, Quaternion.Euler(0, 0, 0));
             ResetPheromoneDepositRate();
         }
 
-        currentState?.Update();
+        currentState?.Tick();
 
         // Check if it's time to update the ant's vitals
         if (Time.time - timeSinceLastUpdate < updateInterval) return;
@@ -96,7 +95,7 @@ public class Ant : MovingEntity
 
     public void Move(PheromoneType type)
     {
-        Vector3 targetDirection = transform.forward;
+        Vector3 targetDirection;
 
         if (TargetPosition != Vector3.down && IsInView(TargetPosition))
         {
@@ -107,9 +106,8 @@ public class Ant : MovingEntity
         {
             targetDirection = GetPheromoneDirections(type);
         }
-
-        MoveInDirection(targetDirection, actualSpeed);
-        ReduceEnergy(GetEnergyCost((IsCarrying) ? "Carry" : "Move") * Time.fixedDeltaTime); // Decrease energy with each movement
+        targetDirection.y = 0; // Keep movement in the horizontal plane
+        MoveTowards(targetDirection, actualSpeed);
 
         if (Time.time - lastStuckTime > 1f)
         {
@@ -124,18 +122,12 @@ public class Ant : MovingEntity
         return Colony != null && Colony.IsInNest(transform.position, genome["Size"].Value);
     }
 
-    public void AddPheromone(PheromoneType type)
-    {
-        AddPheromone(type, currentPheromoneDepositValue);
-    }
-
-    public void AddPheromone(PheromoneType type, float value)
+    public void DropPheromone(PheromoneType type)
     {
         if (type != PheromoneType.None)
         {
-            PheromoneMap.AddPheromone(transform.position, value, type);
+            PheromoneMap.AddPheromone(transform.position, currentPheromoneDepositValue, type);
             ReducePheromone();
-            //TODO: ReduceEnergy?
         }
     }
 
@@ -170,9 +162,8 @@ public class Ant : MovingEntity
         {
             // No pheromone found, wander randomly
             res = GetRandomDirection();
-            res.y = 0;
         }
-
+        
         return res;
     }
 
@@ -229,15 +220,21 @@ public class Ant : MovingEntity
         return pheromones.Length > 0;
     }
 
-    public void FindFood()
+    public bool FindFood()
     {
         // Check if the ant has found food within its view distance
         Target = FindNearest(LayerMask.GetMask("Food"), genome["ViewDistance"].Value);
+        return Target != null;
     }
 
     public bool FoundFood()
     {
-        FindFood();
-        return Target != null || FoundPheromone(PheromoneType.Food);
+        return FindFood() || FoundPheromone(PheromoneType.Food);
+    }
+
+    internal void Wander()
+    {
+        Vector3 randomDirection = GetRandomDirection();
+        MoveTowards(randomDirection, actualSpeed);
     }
 }

@@ -23,6 +23,11 @@ public class Pheromone
             PheromoneType.Home => new Color(0f, 0f, 1f, 0f),// Blue for home
             _ => Color.white,// Default color
         };
+
+        if (Position.y < 0)
+        {
+            Value = 0;
+        }
     }
 
     public float Decay(float decayFactor)

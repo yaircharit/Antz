@@ -3,15 +3,15 @@ using UnityEngine;
 public abstract class StateBase
 {
     protected Ant ant;
-    protected PheromoneType pheroType;
-    public Color stateColor = Color.white;
+    protected PheromoneType pheroDropType;
+    public abstract Color StateColor { get; }
 
-    public StateBase(Ant ant, PheromoneType type = PheromoneType.None, Color color = default(Color)) { this.ant = ant; pheroType = type; stateColor = color; }
+    public StateBase(Ant ant, PheromoneType type = PheromoneType.None) { this.ant = ant; pheroDropType = type; }
     public virtual void Enter() {
         ant.RaiseOnStateChanged();
     }
     public virtual void Exit() { } 
-    public abstract void Update();
+    public abstract void Tick();
 
     public virtual void OnCollisionEnter(Collision other)
     {
@@ -20,6 +20,6 @@ public abstract class StateBase
 
     public override string ToString()
     {
-        return $"{GetType().Name}<{pheroType}>";
+        return $"{GetType().Name}<{pheroDropType}>";
     }
 }

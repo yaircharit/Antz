@@ -11,18 +11,25 @@ public class PheromoneMap : MonoBehaviour
     private Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>> pheromoneGrids;
 
     [Header("ACO Configuration")]
-
     [SerializeField] private float PheromoneDepositValue = 0.5f;
     [SerializeField] private float PheromoneDecayFactor = 0.0001f; // How much pheromone decays per second
     [SerializeField] private float PheromoneDetectionDistance = 2;
     [SerializeField] private float ExplorationRate = 0.3f;
     [SerializeField] private float ExplorationAngle = 20f;
+
+    [Header("Pheromone Colors")]
+    [SerializeField] private Color[] PheromoneColors = {
+        Color.clear,
+        Color.red,   // Food
+        Color.blue,  // Home
+    };
+
     public ACO ACOConfig { get; private set; }
 
 
     void Awake()
     {
-        Instance ??= this;
+        Instance = Instance != null ? Instance : this;
 
         ACOConfig ??= new(PheromoneDepositValue, PheromoneDecayFactor, PheromoneDetectionDistance, ExplorationRate, ExplorationAngle);
 
@@ -72,7 +79,7 @@ public class PheromoneMap : MonoBehaviour
         {
             foreach (var phero in grid.Values)
             {
-                if (phero.Decay(ACOConfig.DecayFactor) < 0)
+                if (phero.Decay(ACOConfig.DecayFactor) <= 0)
                 {
                     toRemove.Add(phero);
                 }

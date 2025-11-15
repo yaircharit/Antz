@@ -7,7 +7,7 @@ public class Player : MonoBehaviour
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float mouseSensitivity = 2f;
+    [SerializeField] private float mouseSensitivity = 30f;
     [SerializeField] private float sprintMultiplier = 2f;
     [SerializeField] private float minPitch = 10f;   // how far down camera can tilt
     [SerializeField] private float maxPitch = 80f;   // how far up camera can tilt
@@ -21,7 +21,6 @@ public class Player : MonoBehaviour
     private Camera playerCamera;
     private bool isPaused = false;
 
-    public float rotationSpeed = 30f;
     private bool isDragging = false;
     private Vector3 lastMousePosition;
     private float yaw = 0f;
@@ -93,8 +92,8 @@ public class Player : MonoBehaviour
         {
             Vector3 delta = Input.mousePosition - lastMousePosition;
 
-            yaw += delta.x * rotationSpeed * Time.deltaTime;
-            pitch -= delta.y * rotationSpeed * Time.deltaTime;
+            yaw += delta.x * mouseSensitivity * Time.deltaTime;
+            pitch -= delta.y * mouseSensitivity * Time.deltaTime;
 
             // Clamp vertical rotation
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);

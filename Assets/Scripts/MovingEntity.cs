@@ -19,7 +19,7 @@ public abstract class MovingEntity : MonoBehaviour
     public float maxEnergy = 100f; // Maximum energy of the ant
     public float currentEnergy; // Current energy of the ant, can be used for energy management
 
-    public Genome genome { get; protected set; } // Genome of the ant, can be used for genetic algorithms or traits
+    protected Genome genome; // Genome of the ant, can be used for genetic algorithms or traits
     public float actualSpeed;
     public float actualStrength;
 
@@ -68,8 +68,11 @@ public abstract class MovingEntity : MonoBehaviour
         Name = $"{Name}_{ID}"; // Set the name based on the ID
 
         OnDamageTaken += (x) => FlashColor(damageColor, 0.2f);
-        OnHealed += (x) => FlashColor(healColor, 0.2f);
+        OnDamageTaken += TakeDamage;
 
+        OnHealed += (x) => FlashColor(healColor, 0.2f);
+        OnHealed += Heal;
+        OnHealed += (value) => ReduceEnergy(value * 5); // Healing costs energy
 
         genome = new Genome(); // Initialize genome with default values
         genome.Mutate(true); // Mutate the genome to get random traits
@@ -96,12 +99,13 @@ public abstract class MovingEntity : MonoBehaviour
         currentState?.Enter();
     }
 
-    public void MoveInDirection(Vector3 targetDirection, float speed)
+    public void MoveTowards(Vector3 targetDirection, float speed)
     {
         if (targetDirection == Vector3.zero) targetDirection = Vector3.forward; // Avoid division by zero or invalid movement
         transform.forward = targetDirection;
         var distance = speed * Time.fixedDeltaTime * targetDirection;
         transform.position += distance;
+        ReduceEnergy(GetEnergyCost() * Time.fixedDeltaTime); // Decrease energy with each movement
     }
 
     public Vector3 GetDirectionTo(Vector3 targetPosition)
@@ -245,28 +249,24 @@ public abstract class MovingEntity : MonoBehaviour
         OnEnergyChanged?.Invoke(currentEnergy);
     }
 
-    public bool IsHungry()
+    public bool IsHungry
     {
-        return currentEnergy <= maxEnergy * genome["HungerThreshold"].Value; // Check if the ant is hungry based on the hunger threshold defined in genome traits
+        get { return currentEnergy <= maxEnergy * genome["HungerThreshold"].Value; } // Check if the ant is hungry based on the hunger threshold defined in genome traits
+    }
+    public bool IsFull
+    {
+        get { return currentEnergy >= maxEnergy * genome["IsFullThreshold"].Value; }
     }
 
-    public float GetEnergyCost(string action)
+    public float GetEnergyCost()
     {
+        // TODO: place this in a config file or somethin
         //TODO: view angle should raise energy cost, not lower it.
-        float modifiers = 0.03f * genome["Size"].Value * genome["ViewAngle"].Value / 360f * genome["ViewDistance"].Value;
-
-        return action.ToLower() switch
-        {
-            "move" => modifiers * actualSpeed,// Energy cost for moving
-            "carry" => modifiers * (CarriedMass / actualStrength) * actualSpeed,// Energy cost for carrying food
-            _ => modifiers,// Default energy cost for other actions
-        };
-    }
+        float modifiers = 0.01f * genome["Size"].Value * genome["ViewAngle"].Value / 90f * genome["ViewDistance"].Value;
 
 
-    public bool IsFull(float precentage = 0.8f)
-    {
-        return currentEnergy >= maxEnergy * precentage;
+        return modifiers * actualSpeed // Base energy cost for moving
+        * (IsCarrying ? (CarriedMass / actualStrength) : 1);// Energy cost multiplier for carrying food
     }
 
     public void CheckVitals()
@@ -274,12 +274,12 @@ public abstract class MovingEntity : MonoBehaviour
         if (currentEnergy == 0)
         {
             // Set on Hunger?
-            TakeDamage(10);
+            OnDamageTaken?.Invoke(10);
         }
-        else if (!IsHungry())
+        else if (!IsHungry)
         {
             // Set on Hunger?
-            Heal(1);
+            OnHealed?.Invoke(1);
         }
         if (IsDead())
         {
@@ -292,14 +292,10 @@ public abstract class MovingEntity : MonoBehaviour
         if (currentHealth < maxHealth)
         {
             currentHealth += value;
-            ReduceEnergy(value * 5); // Healing costs energy
             if (currentHealth > maxHealth)
             {
                 currentHealth = maxHealth; // Cap health at maximum
             }
-            // Visual indication: briefly change color to highlightColor
-           
-            OnHealed?.Invoke(currentHealth);
         }
     }
 
@@ -313,7 +309,6 @@ public abstract class MovingEntity : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        OnDamageTaken?.Invoke(currentHealth);
     }
 
     public IEnumerable FlashColor(Color color, float duration)

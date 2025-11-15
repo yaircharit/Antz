@@ -1,65 +1,37 @@
 ﻿using UnityEngine;
 
-public class GoToNestState : StateBase
+public class GoToNestState : TrackPheromonesState
 {
-    public GoToNestState(Ant ant, PheromoneType type = PheromoneType.None) : base(ant, type)
+    public override Color StateColor => Color.Lerp(Color.blue,Color.red,0.5f);
+    public GoToNestState(Ant ant, PheromoneType pheroDropType = PheromoneType.None) : base(ant, pheroDropType, PheromoneType.Home)
     {
         // This state is used when the ant needs to return to the nest, either to deposit food or because it has no more tasks.
     }
     public override void Enter()
     {
-        stateColor = (ant.IsCarrying) ? Color.Lerp(Color.red, Color.yellow, 0.5f) : Color.blue;
-        base.Enter();
         ant.TargetPosition = ant.Colony.NestPos;
-        if (pheroType == PheromoneType.Food)
-        {
-            ant.ResetPheromoneDepositRate(); // Reset pheromone deposit rate when entering this state
-        }
+        base.Enter();
     }
-    public override void Exit()
-    {
 
-    }
-    public override void Update()
+    public override void Tick()
     {
         if (ant.IsInNest())
         {
             ant.ResetPheromoneDepositRate();
-            if (ant.IsCarrying)
-            {
-                ant.Colony.AddFood(ant.CarriedMass);
-                ant.Drop(); // Drop carried object in nest
-            }
 
-            if (!ant.IsFull())
+            if (!ant.IsFull && ant.Colony.HasFood)
             {
-                ant.ChangeState(new HungryState(ant)); // If hungry, eat food in nest
+                ant.Eat(); // If hungry, eat food in nest
                 return;
             }
 
-            ant.ChangeState(new SeekingFoodState(ant)); // If not hungry, seek food
+            ant.ChangeState(new ExploreState(ant)); // If not hungry, seek food
             return;
         }
 
-        if (ant.IsHungry() && ant.IsCarrying)
-        {
-            ant.ChangeState(new HungryState(ant)); // If hungry, eat food in nest
-            return;
-        }
-        ant.TargetPosition = ant.Colony.NestPos;
+        base.Tick();
 
-        ant.Move(PheromoneType.Home); // Go to nest
-
-        if (pheroType != PheromoneType.None && !ant.IsCarrying && ant.FoundFood()) //TODO: FoundFood sets target away from nest
-        {
-            ant.ChangeState(new SeekingFoodState(ant)); // If not carrying food, seek food
-            return;
-        }
-
-        ant.AddPheromone(pheroType);
-
-
-        if (pheroType == PheromoneType.None)
+        if (pheroDropType == PheromoneType.None)
         {
             // TODO: seperate to new ClearPheromoneState?
             ant.RemovePheromone(PheromoneType.Food); // Clear food pheromone path if no food was found and ant went back

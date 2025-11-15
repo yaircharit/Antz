@@ -70,8 +70,8 @@ public class AntColony : MonoBehaviour
         Player.Instance.foodScoreText.text = $"Food: {foodScore}";
     }
 
-    internal bool HasFood()
+    internal bool HasFood
     {
-        return foodScore > 0;
+        get { return foodScore > 0; }
     }
 }
