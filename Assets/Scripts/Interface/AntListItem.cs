@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.TerrainUtils;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.Interface
@@ -26,10 +28,17 @@ namespace Assets.Scripts.Interface
             energyBar.value = ant.currentEnergy;
 
             ant.OnEnergyChanged += UpdateEnergy;
-            ant.OnHealthChanged += UpdateHealth;
-            ant.OnSelected += Select;
-            ant.OnDeselected += Deselect;
+            ant.OnDamageTaken += UpdateHealth;
+            ant.OnDamageTaken += (x) => FlashColor(ant.damageColor, ant.damageFlashDuration);
+            ant.OnHealed += UpdateHealth;
+            ant.OnHealed += (x) => FlashColor(ant.healColor, ant.healFlashDuration);
+            ant.OnSelected += () => Select(ant.highlightColor);
+            ant.OnDeselected += () => Deselect(Color.white);
             ant.OnDestroyed += () => Destroy(gameObject);
+            ant.OnStateChanged += (state) =>
+            {
+                antStatus.color = state.stateColor;
+            };
             OnSelect += ant.RaiseOnSelected;
         }
 
@@ -43,24 +52,25 @@ namespace Assets.Scripts.Interface
             energyBar.value = currentEnergy;
         }
 
-        public void Select()
+        public void Select(Color highlightColor)
         {
-            background.color = Color.yellow;
+            background.color = highlightColor;
         }
-        public void Deselect()
+        public void Deselect(Color baseColor)
         {
-            background.color = Color.white;
+            background.color = baseColor;
         }
 
-        public void FlashColor(Color color)
+        public IEnumerable FlashColor(Color color, float duration)
         {
-            background.material.color = Color.Lerp(Color.white, color, 0.5f);
-            Invoke(nameof(ResetColor) , 0.2f);
+            Color prevColor = background.material.color;
+            background.material.color = Color.Lerp(prevColor, color, 0.5f);
+            yield return new WaitForSeconds(duration);
+            background.material.color = prevColor;
         }
 
         public void ResetColor()
         {
-            background.material.color = Color.white;
         }
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)

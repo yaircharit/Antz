@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public abstract class MovingEntity : MonoBehaviour
@@ -46,19 +47,29 @@ public abstract class MovingEntity : MonoBehaviour
     public Color baseColor = Color.black;
     public Color highlightColor = Color.yellow;
     public Color damageColor = Color.red;
+    public float damageFlashDuration = 0.2f;
+    public Color healColor = Color.green;
+    public float healFlashDuration = 0.3f;
 
     public event System.Action OnSelected;
     public event System.Action OnDeselected;
     public event System.Action OnDestroyed;
 
-    public event System.Action<float> OnHealthChanged;
+    public event System.Action<float> OnDamageTaken;
+    public event System.Action<float> OnHealed;
     public event System.Action<float> OnEnergyChanged;
+    public event System.Action<StateBase> OnStateChanged;
+
 
     public virtual void Init()
     {
 
         ID = Count++; // Increment the static ant count
         Name = $"{Name}_{ID}"; // Set the name based on the ID
+
+        OnDamageTaken += (x) => FlashColor(damageColor, 0.2f);
+        OnHealed += (x) => FlashColor(healColor, 0.2f);
+
 
         genome = new Genome(); // Initialize genome with default values
         genome.Mutate(true); // Mutate the genome to get random traits
@@ -281,18 +292,14 @@ public abstract class MovingEntity : MonoBehaviour
         if (currentHealth < maxHealth)
         {
             currentHealth += value;
-            ReduceEnergy(value*5); // Healing costs energy
+            ReduceEnergy(value * 5); // Healing costs energy
             if (currentHealth > maxHealth)
             {
                 currentHealth = maxHealth; // Cap health at maximum
             }
             // Visual indication: briefly change color to highlightColor
-            if (meshRenderer != null)
-            {
-                meshRenderer.material.color = Color.Lerp(baseColor, Color.green, 0.5f);
-                Invoke("ResetColor", 0.2f);
-            }
-            OnHealthChanged?.Invoke(currentHealth);
+           
+            OnHealed?.Invoke(currentHealth);
         }
     }
 
@@ -306,13 +313,18 @@ public abstract class MovingEntity : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        OnHealthChanged?.Invoke(currentHealth);
-        meshRenderer.material.color = Color.Lerp(baseColor, damageColor, 0.5f);
-        Invoke(nameof(ResetColor), 0.2f);
+        OnDamageTaken?.Invoke(currentHealth);
     }
-    private void ResetColor()
+
+    public IEnumerable FlashColor(Color color, float duration)
     {
-        meshRenderer.material.color = baseColor;
+        if (meshRenderer != null)
+        {
+            Color prevColor = meshRenderer.material.color;
+            meshRenderer.material.color = color;
+            yield return new WaitForSeconds(duration);
+            meshRenderer.material.color = prevColor;
+        }
     }
 
     public bool IsDead()
@@ -344,6 +356,10 @@ public abstract class MovingEntity : MonoBehaviour
         OnDeselected?.Invoke();
     }
 
+    public void RaiseOnStateChanged()
+    {
+        OnStateChanged?.Invoke(currentState);
+    }
     private void OnCollisionEnter(Collision collision)
     {
         currentState?.OnCollisionEnter(collision);

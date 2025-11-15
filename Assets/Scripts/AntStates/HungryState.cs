@@ -7,9 +7,10 @@ using UnityEngine;
 
 public class HungryState : StateBase
 {
-    public HungryState(Ant ant, PheromoneType type = PheromoneType.None) : base(ant, type) { }
+    public HungryState(Ant ant, PheromoneType type = PheromoneType.None) : base(ant, type, Color.yellow) { }
     public override void Enter()
     {
+        base.Enter();
     }
     public override void Exit()
     {

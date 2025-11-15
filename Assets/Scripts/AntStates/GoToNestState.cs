@@ -1,4 +1,6 @@
-﻿public class GoToNestState : StateBase
+﻿using UnityEngine;
+
+public class GoToNestState : StateBase
 {
     public GoToNestState(Ant ant, PheromoneType type = PheromoneType.None) : base(ant, type)
     {
@@ -6,6 +8,8 @@
     }
     public override void Enter()
     {
+        stateColor = (ant.IsCarrying) ? Color.Lerp(Color.red, Color.yellow, 0.5f) : Color.blue;
+        base.Enter();
         ant.TargetPosition = ant.Colony.NestPos;
         if (pheroType == PheromoneType.Food)
         {

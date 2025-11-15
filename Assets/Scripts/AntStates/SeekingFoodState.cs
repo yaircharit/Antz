@@ -3,9 +3,13 @@ using UnityEngine;
 
 public class SeekingFoodState : StateBase
 {
-    public SeekingFoodState(Ant ant, PheromoneType type = PheromoneType.Home) : base(ant, type) { }
+    public SeekingFoodState(Ant ant, PheromoneType type = PheromoneType.Home) : base(ant, type, Color.blue) { }
     public override void Enter() {
-
+        if (ant.FoundFood())
+        {
+            stateColor = Color.red;
+        }
+        base.Enter();
     }
     public override void Exit() { }
     public override void Update()
