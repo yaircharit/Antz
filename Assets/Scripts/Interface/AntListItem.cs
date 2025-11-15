@@ -1,28 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.Interface
 {
-    public class AntListItem : MonoBehaviour
+    public class AntListItem : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private TMP_Text antNameText;
         [SerializeField] private RawImage antStatus;
         [SerializeField] private Slider healthBar;
         [SerializeField] private Slider energyBar;
         [SerializeField] private Button moreButton;
+        [SerializeField] private Image background;
 
-        private Ant ant;
+        private Action OnSelect;
 
         internal void Init(Ant ant)
         {
-            this.ant = ant;
-
             antNameText.text = ant.Name;
             healthBar.maxValue = ant.maxHealth;
             healthBar.value = ant.currentHealth;
@@ -31,7 +27,10 @@ namespace Assets.Scripts.Interface
 
             ant.OnEnergyChanged += UpdateEnergy;
             ant.OnHealthChanged += UpdateHealth;
-            //ant.OnDestroyed += () => Destroy();
+            ant.OnSelected += Select;
+            ant.OnDeselected += Deselect;
+            ant.OnDestroyed += () => Destroy(gameObject);
+            OnSelect += ant.RaiseOnSelected;
         }
 
         public void UpdateHealth(float currentHealth)
@@ -44,9 +43,29 @@ namespace Assets.Scripts.Interface
             energyBar.value = currentEnergy;
         }
 
-        private void OnMouseDown()
+        public void Select()
         {
-            ant.Select();
+            background.color = Color.yellow;
+        }
+        public void Deselect()
+        {
+            background.color = Color.white;
+        }
+
+        public void FlashColor(Color color)
+        {
+            background.material.color = Color.Lerp(Color.white, color, 0.5f);
+            Invoke(nameof(ResetColor) , 0.2f);
+        }
+
+        public void ResetColor()
+        {
+            background.material.color = Color.white;
+        }
+
+        void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+        {
+            OnSelect?.Invoke();
         }
     }
 }

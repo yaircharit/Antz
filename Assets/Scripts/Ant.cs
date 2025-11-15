@@ -24,7 +24,7 @@ public class Ant : MovingEntity
         meshRenderer = GetComponentInChildren<MeshRenderer>();
         meshRenderer.material.color = baseColor;
 
-        OnSelected += Select; //TODO: Actually use events
+        OnSelected += Select; 
         OnDeselected += Deselect;
     }
 
@@ -70,7 +70,7 @@ public class Ant : MovingEntity
 
     private void OnMouseDown()
     {
-        Select();
+        RaiseOnSelected();
     }
 
     public void Select()
@@ -78,7 +78,7 @@ public class Ant : MovingEntity
         // Deselect previous ant
         if (SelectedAnt != null && SelectedAnt != this)
         {
-            SelectedAnt.Deselect();
+            SelectedAnt.RaiseOnDeselected();
         }
         SelectedAnt = this;
         Highlight(true);

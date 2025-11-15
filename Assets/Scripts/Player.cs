@@ -118,7 +118,7 @@ public class Player : MonoBehaviour
             }
             if (Ant.SelectedAnt != null)
             {
-                Ant.SelectedAnt.Deselect();
+                Ant.SelectedAnt.RaiseOnDeselected();
             }
         }
     }

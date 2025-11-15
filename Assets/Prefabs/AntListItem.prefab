@@ -1268,6 +1268,7 @@ MonoBehaviour:
   healthBar: {fileID: 8419854039661362452}
   energyBar: {fileID: 3542438258790535547}
   moreButton: {fileID: 7924740398044201715}
+  background: {fileID: 4057253691330374449}
 --- !u!1 &6479747307017320160
 GameObject:
   m_ObjectHideFlags: 0

@@ -331,6 +331,16 @@ public abstract class MovingEntity : MonoBehaviour
         }
     }
 
+    public void RaiseOnSelected()
+    {
+        OnSelected?.Invoke();
+    }
+
+    public void RaiseOnDeselected()
+    {
+        OnDeselected?.Invoke();
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         currentState?.OnCollisionEnter(collision);
