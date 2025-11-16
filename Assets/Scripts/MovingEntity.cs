@@ -50,6 +50,7 @@ public abstract class MovingEntity : MonoBehaviour
     public static float damageFlashDuration = 0.5f;
     public static Color healColor = Color.green;
     public static float healFlashDuration = 0.5f;
+    private Coroutine flashingCoroutine = null;
 
     public bool isSelected = false;
     public event System.Action OnSelected;
@@ -67,10 +68,16 @@ public abstract class MovingEntity : MonoBehaviour
         ID = Count++; // Increment the static ant count
         Name = $"{Name}_{ID}"; // Set the name based on the ID
 
-        OnDamageTaken += (_) => StartCoroutine(FlashColor(damageColor, damageFlashDuration));
+        OnDamageTaken += (_) =>
+        {
+            flashingCoroutine ??= StartCoroutine(FlashColor(damageColor, damageFlashDuration));
+        };
         OnDamageTaken += TakeDamage;
 
-        OnHealed += (_) => StartCoroutine(FlashColor(healColor, healFlashDuration));
+        OnHealed += (_) =>
+        {
+            flashingCoroutine ??= StartCoroutine(FlashColor(healColor, healFlashDuration));
+        };
         OnHealed += Heal;
 
         genome = new Genome(); // Initialize genome with default values
@@ -312,13 +319,15 @@ public abstract class MovingEntity : MonoBehaviour
 
     public IEnumerator FlashColor(Color color, float duration)
     {
-        if (meshRenderer != null)
-        {
+        if (flashingCoroutine != null)
+            yield return null;
+
             Color prevColor = meshRenderer.material.color;
             meshRenderer.material.color = color;
             yield return new WaitForSeconds(duration);
             meshRenderer.material.color = prevColor;
-        }
+        yield return new WaitForSeconds(duration);
+        flashingCoroutine = null;
     }
 
     public bool IsDead()

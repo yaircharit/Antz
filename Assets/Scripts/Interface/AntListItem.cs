@@ -19,6 +19,8 @@ namespace Assets.Scripts.Interface
 
         private Action OnSelect;
 
+        private Coroutine flashCoroutine;
+
         internal void Init(Ant ant)
         {
             antNameText.text = ant.Name;
@@ -30,10 +32,14 @@ namespace Assets.Scripts.Interface
             ant.OnEnergyChanged += (_) => UpdateEnergy(ant.currentEnergy);
 
             ant.OnDamageTaken += (_) => UpdateHealth(ant.currentHealth);
-            ant.OnDamageTaken += (_) => StartCoroutine(FlashColor(MovingEntity.damageColor, MovingEntity.damageFlashDuration));
+            ant.OnDamageTaken += (_) => {
+                flashCoroutine ??= StartCoroutine(FlashColor(MovingEntity.damageColor, MovingEntity.damageFlashDuration));
+                };
 
             ant.OnHealed += (_) => UpdateHealth(ant.currentHealth);
-            ant.OnHealed += (_) => StartCoroutine(FlashColor(MovingEntity.healColor, MovingEntity.healFlashDuration));
+            ant.OnHealed += (_) => {
+                flashCoroutine ??= StartCoroutine(FlashColor(MovingEntity.healColor, MovingEntity.healFlashDuration));
+            };
 
             ant.OnSelected += () => Select(MovingEntity.highlightColor);
             ant.OnDeselected += () => Deselect(Color.white);
@@ -66,14 +72,17 @@ namespace Assets.Scripts.Interface
 
         public IEnumerator FlashColor(Color color, float duration)
         {
+            if (flashCoroutine != null)
+            {
+                yield break;
+            }
+
             Color prevColor = background.color;
             background.color = color;
             yield return new WaitForSeconds(duration);
             background.color = prevColor;
-        }
-
-        public void ResetColor()
-        {
+            yield return new WaitForSeconds(duration);
+            flashCoroutine = null;
         }
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
