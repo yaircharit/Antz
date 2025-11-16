@@ -6,9 +6,11 @@ public class PheromoneMap : MonoBehaviour
 {
     public static PheromoneMap Instance { get; private set; }
     public Vector3 Center { get; private set; } = Vector3.zero;
-    public float cellSize = 1f;
 
     private Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>> pheromoneGrids;
+
+    [Header("Map Components")]
+    [SerializeField] private PheromoneMapMeshRenderer meshRenderer;
 
     [Header("ACO Configuration")]
     [SerializeField] private float PheromoneDepositValue = 0.5f;
@@ -24,7 +26,7 @@ public class PheromoneMap : MonoBehaviour
         Color.blue,  // Home
     };
 
-    public ACO ACOConfig { get; private set; }
+    public ACO ACOConfig { get; private set; } //TODO: Make SO and fix logic, maybe decouple some things
 
 
     void Awake()
@@ -32,6 +34,9 @@ public class PheromoneMap : MonoBehaviour
         Instance = Instance != null ? Instance : this;
 
         ACOConfig ??= new(PheromoneDepositValue, PheromoneDecayFactor, PheromoneDetectionDistance, ExplorationRate, ExplorationAngle);
+
+        if (meshRenderer == null)
+            meshRenderer = GetComponent<PheromoneMapMeshRenderer>();
 
         if (pheromoneGrids == null)
         {
@@ -45,7 +50,7 @@ public class PheromoneMap : MonoBehaviour
 
     public Vector3Int Round(Vector3 worldPos)
     {
-        return Vector3Int.RoundToInt(worldPos);
+        return Vector3Int.FloorToInt(worldPos);
     }
 
     public void AddPheromone(Vector3 worldPos, float amount, PheromoneType type)
@@ -154,19 +159,6 @@ public class PheromoneMap : MonoBehaviour
     void FixedUpdate()
     {
         Evaporate();
-    }
-
-    void OnDrawGizmos()
-    {
-        if (pheromoneGrids == null) return;
-
-        foreach (var grid in pheromoneGrids.Values)
-        {
-            foreach (var phero in grid.Values)
-            {
-                Gizmos.color = phero.Color;
-                Gizmos.DrawCube(phero.Position, new Vector3(cellSize , 0.01f, cellSize));
-            }
-        }
+        meshRenderer.BuildMesh(pheromoneGrids);
     }
 }

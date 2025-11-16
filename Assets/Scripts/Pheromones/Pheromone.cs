@@ -4,12 +4,14 @@ public enum PheromoneType { None, Food, Home, Nest, Danger, Panic } //TODO: Impl
 
 public class Pheromone
 {
+    private static readonly Color[] Colors = PheromoneMap.Instance.PheromoneColors;
+
     public PheromoneType Type;
     public float Value;
     public Vector3Int Position;
 
     private Color color;
-    public Color Color => new(color.r, color.g, color.b, Value/2);
+    public Color Color => new(color.r, color.g, color.b, Mathf.Clamp01(Value/2));
 
     public Pheromone(PheromoneType type, float value, Vector3Int position)
     {
@@ -17,7 +19,7 @@ public class Pheromone
         Value = value;
         Position = position;
 
-        color = PheromoneMap.Instance.PheromoneColors[(int)Type];
+        color = Colors[(int)Type];
 
         if (Position.y < 0)
         {
