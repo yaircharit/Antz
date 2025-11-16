@@ -12,7 +12,6 @@ public class Ant : MovingEntity
     public float currentPheromoneDepositValue; // Current pheromone deposit rate, reduced over time
     public AntColony Colony { get; private set; } = null; // Reference to the colony this ant belongs to
 
-    public bool isStuck = false; // Flag to indicate if the ant is stuck
 
     private void Awake()
     {
@@ -107,11 +106,11 @@ public class Ant : MovingEntity
             targetDirection = GetPheromoneDirections(type);
         }
         targetDirection.y = 0; // Keep movement in the horizontal plane
-        MoveTowards(targetDirection, actualSpeed);
+        MoveTowards(targetDirection, currentSpeed);
 
         if (Time.time - lastStuckTime > 1f)
         {
-            isStuck = GetDistanceTo(lastPosition) < 0.01f * actualSpeed;
+            isStuck = GetDistanceTo(lastPosition) < 0.01f * currentSpeed;
             lastStuckTime = Time.time; // Update last stuck time
             lastPosition = transform.position; // Update last position
         }
@@ -174,8 +173,7 @@ public class Ant : MovingEntity
 
     public void ReducePheromone()
     {
-        currentPheromoneDepositValue -= actualSpeed * ACO.Instance.DecayFactor * Time.deltaTime; // Decrease pheromone deposit rate over time
-        currentPheromoneDepositValue = Mathf.Max(currentPheromoneDepositValue, 0); // Ensure it doesn't go below a minimum threshold
+        currentPheromoneDepositValue -= currentSpeed * ACO.Instance.DecayFactor * Time.deltaTime; // Decrease pheromone deposit rate over time
     }
 
     public bool LowOnPheromones()
@@ -235,6 +233,6 @@ public class Ant : MovingEntity
     internal void Wander()
     {
         Vector3 randomDirection = GetRandomDirection();
-        MoveTowards(randomDirection, actualSpeed);
+        MoveTowards(randomDirection, currentSpeed);
     }
 }

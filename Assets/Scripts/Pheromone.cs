@@ -17,12 +17,7 @@ public class Pheromone
         Value = value;
         Position = position;
 
-        color = type switch
-        {
-            PheromoneType.Food => new Color(1f, 0f, 0f, 0f),// Red for food
-            PheromoneType.Home => new Color(0f, 0f, 1f, 0f),// Blue for home
-            _ => Color.white,// Default color
-        };
+        color = PheromoneMap.Instance.PheromoneColors[(int)Type];
 
         if (Position.y < 0)
         {

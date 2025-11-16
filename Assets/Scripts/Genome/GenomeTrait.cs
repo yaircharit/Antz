@@ -39,6 +39,11 @@ public class GenomeTrait
         };
     }
 
+    public float GetEnergyCost()
+    {
+        return Value * Definition.EnergyCostPerUnit;
+    }
+
     public void Mutate(bool forceMutation = false)
     {
         if (forceMutation || UnityEngine.Random.value < MutationRate)

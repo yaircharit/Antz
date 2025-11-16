@@ -12,6 +12,7 @@ public class GenomeTraitDefinition : ScriptableObject
     public float DefaultValue = 0.5f;
     public float MinValue = 0;
     public float MaxValue = 1;
+    public float EnergyCostPerUnit = 1f;
 
     [Header("Genetics")]
     [Range(0f, 1f)]

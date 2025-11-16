@@ -13,17 +13,22 @@ public abstract class MovingEntity : MonoBehaviour
     public bool IsCarrying => CarriedObj != null;
 
 
-    public float maxHealth = 100; // Maximum health of the ant
+    public float currentSpeed;
     public float currentHealth; // Current health of the ant, can be used for health management
-    public float maxEnergy = 100f; // Maximum energy of the ant
     public float currentEnergy; // Current energy of the ant, can be used for energy management
 
     protected Genome genome; // Genome of the ant, can be used for genetic algorithms or traits
-    public float actualSpeed;
-    public float actualStrength;
-
+    public float MaxHealth { get { return genome.MaxHealth; } }
+    public float MaxEnergy { get { return genome.MaxEnergy; } }
     public GameObject CarriedObj { get; protected set; }
     public float CarriedMass { get; protected set; } = 0f; // Mass of the carried object, used to calculate speed when carrying food
+
+    public bool isSelected = false;
+    private bool isHealing;
+    private readonly float healingCostModifier = 2f;
+
+    public bool isStuck = false; // Flag to indicate if the ant is stuck
+
 
     protected Transform _target;
     public Transform Target
@@ -52,10 +57,9 @@ public abstract class MovingEntity : MonoBehaviour
     public static float healFlashDuration = 0.5f;
     private Coroutine flashingCoroutine = null;
 
-    public bool isSelected = false;
     public event System.Action OnSelected;
     public event System.Action OnDeselected;
-    public event System.Action OnDestroyed;
+    public event System.Action OnKilled;
 
     public event System.Action<float> OnDamageTaken;
     public event System.Action<float> OnHealed;
@@ -80,19 +84,15 @@ public abstract class MovingEntity : MonoBehaviour
         };
         OnHealed += Heal;
 
+        OnKilled += Kill;
+
         genome = new Genome(); // Initialize genome with default values
         genome.Mutate(true); // Mutate the genome to get random traits
 
-        float size = genome["Size"].Value;
-
-        maxHealth = 100f * size; // Set maximum health based on size trait
-        maxEnergy = 100f * size; // Set maximum energy based on size trait
-        transform.localScale = Vector3.one * size; // Set the scale of the ant based on size trait
-
-        currentHealth = maxHealth; // Initialize current health
-        currentEnergy = maxEnergy;
-        actualSpeed = genome["Speed"].Value / size; // Initialize actual speed
-        actualStrength = genome["Strength"].Value * size;
+        transform.localScale = Vector3.one * genome["Size"].Value; // Set the scale of the ant based on size trait
+        currentSpeed = genome.EffectiveSpeed; // Initialize current speed based on genome
+        currentHealth = genome.MaxHealth; // Initialize current health
+        currentEnergy = genome.MaxEnergy;
 
         transform.rotation = Quaternion.Euler(0, Random.value * 360f, 0); // Randomize initial rotation
         lastPosition = transform.position; // Store the initial position as last position
@@ -193,8 +193,8 @@ public abstract class MovingEntity : MonoBehaviour
             CarriedObj.transform.position = transform.position + Vector3.up * CarryHeight;
             CarriedMass = rb.mass;
 
-            // !! SPEED ADJUSTMENT !!   normal speed * carrrying multiplier (1 is normal speed, 0.5 is half speed, etc.)
-            actualSpeed = ((genome["Speed"].Value / genome["Size"].Value) / Mathf.Max(1, CarriedMass / actualStrength * CarrySpeedModifier)); // Adjust speed based on carried mass
+            // !! SPEED ADJUSTMENT !!   normal speed / carrrying multiplier (1 is normal speed, 0.5 is half speed, etc.)
+            currentSpeed = (genome.EffectiveSpeed) / Mathf.Max(1, CarriedMass / genome.EffectiveStrength * CarrySpeedModifier); // Adjust speed based on carried mass
 
             return true;
         }
@@ -231,7 +231,7 @@ public abstract class MovingEntity : MonoBehaviour
             CarriedMass = 0f;
 
             // !! SPEED ADJUSTMENT !!
-            actualSpeed = genome["Speed"].Value / genome["Size"].Value; // Reset speed to normal when not carrying anything
+            currentSpeed = genome.EffectiveSpeed; // Reset speed to normal when not carrying anything
         }
     }
 
@@ -248,30 +248,32 @@ public abstract class MovingEntity : MonoBehaviour
     public void AddEnergy(float amount)
     {
         currentEnergy += amount; // Increase energy by the specified amount
-        if (currentEnergy > maxEnergy)
+        if (currentEnergy > MaxEnergy)
         {
-            currentEnergy = maxEnergy; // Cap energy at maximum
+            currentEnergy = MaxEnergy; // Cap energy at maximum
         }
         OnEnergyChanged?.Invoke(currentEnergy);
     }
 
     public bool IsHungry
     {
-        get { return currentEnergy <= maxEnergy * genome["HungerThreshold"].Value; } // Check if the ant is hungry based on the hunger threshold defined in genome traits
+        get { return currentEnergy <= MaxEnergy * genome["HungerThreshold"].Value; } // Check if the ant is hungry based on the hunger threshold defined in genome traits
     }
     public bool IsFull
     {
-        get { return currentEnergy >= maxEnergy * genome["IsFullThreshold"].Value; }
+        get { return currentEnergy >= MaxEnergy * genome["IsFullThreshold"].Value; }
     }
 
     public float GetEnergyCost()
     {
-        // TODO: place this in a config file or somethin
-        //TODO: view angle should raise energy cost, not lower it.
-        float modifiers = 0.01f * genome["Size"].Value * genome["ViewAngle"].Value / 90f * genome["ViewDistance"].Value;
+        float cost = genome.GetEnergyCost();
 
-        return modifiers * actualSpeed // Base energy cost for moving
-        * (IsCarrying ? (CarriedMass / actualStrength) : 1);// Energy cost multiplier for carrying food
+        if (IsCarrying)
+            cost *= CarriedMass / genome.EffectiveStrength; // Energy cost multiplier for carrying food
+        if (isHealing)
+            cost *= healingCostModifier; // Increased energy cost when healing
+
+        return cost * currentSpeed;
     }
 
     public void CheckVitals()
@@ -281,40 +283,43 @@ public abstract class MovingEntity : MonoBehaviour
             // Set on Hunger?
             OnDamageTaken?.Invoke(GetEnergyCost());
         }
-        else if (currentHealth < maxHealth && !IsHungry)
+        else if (currentHealth < MaxHealth && !IsHungry)
         {
             // Set on Hunger?
-            OnHealed?.Invoke(1);
+            isHealing = true;
+            OnHealed?.Invoke(genome.HealingRate);
         }
-        if (IsDead())
+        else
         {
-            Kill();
+            isHealing = false;
         }
     }
 
     private void Heal(float value)
     {
-        if (currentHealth < maxHealth)
+        currentHealth += value;
+        if (currentHealth > MaxHealth)
         {
-            currentHealth += value;
-            if (currentHealth > maxHealth)
-            {
-                currentHealth = maxHealth; // Cap health at maximum
-            }
-            ReduceEnergy(value * 5); // Healing costs energy
+            currentHealth = MaxHealth; // Cap health at maximum
         }
     }
 
     public void Kill()
     {
         // TODO: Visual indication, than die
+        OnDeselected?.Invoke();
         Debug.Log(this + " is dead!");
+        
         Destroy(gameObject);
     }
 
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            OnKilled?.Invoke();
+        }
     }
 
     public IEnumerator FlashColor(Color color, float duration)
@@ -322,17 +327,12 @@ public abstract class MovingEntity : MonoBehaviour
         if (flashingCoroutine != null)
             yield return null;
 
-            Color prevColor = meshRenderer.material.color;
-            meshRenderer.material.color = color;
-            yield return new WaitForSeconds(duration);
-            meshRenderer.material.color = prevColor;
+        Color prevColor = meshRenderer.material.color;
+        meshRenderer.material.color = color;
+        yield return new WaitForSeconds(duration);
+        meshRenderer.material.color = prevColor;
         yield return new WaitForSeconds(duration);
         flashingCoroutine = null;
-    }
-
-    public bool IsDead()
-    {
-        return currentHealth <= 0; // Check if the ant is dead based on current health
     }
 
 
@@ -385,9 +385,4 @@ public abstract class MovingEntity : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        OnDeselected?.Invoke();
-        OnDestroyed?.Invoke();
-    }
 }

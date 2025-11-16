@@ -18,5 +18,6 @@ MonoBehaviour:
   DefaultValue: 270
   MinValue: 0
   MaxValue: 360
+  EnergyCostPerUnit: 0.25
   BaseMutationRate: 0.1
   BaseMutationStrength: 0.25

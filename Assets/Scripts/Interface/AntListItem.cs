@@ -24,9 +24,9 @@ namespace Assets.Scripts.Interface
         internal void Init(Ant ant)
         {
             antNameText.text = ant.Name;
-            healthBar.maxValue = ant.maxHealth;
+            healthBar.maxValue = ant.MaxHealth;
             healthBar.value = ant.currentHealth;
-            energyBar.maxValue = ant.maxEnergy;
+            energyBar.maxValue = ant.MaxEnergy;
             energyBar.value = ant.currentEnergy;
 
             ant.OnEnergyChanged += (_) => UpdateEnergy(ant.currentEnergy);
@@ -43,7 +43,7 @@ namespace Assets.Scripts.Interface
 
             ant.OnSelected += () => Select(MovingEntity.highlightColor);
             ant.OnDeselected += () => Deselect(Color.white);
-            ant.OnDestroyed += () => Destroy(gameObject);
+            ant.OnKilled += () => Destroy(gameObject);
             ant.OnStateChanged += (state) =>
             {
                 antStatus.color = state.StateColor;

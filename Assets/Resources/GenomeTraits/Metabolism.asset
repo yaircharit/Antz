@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3c764cadd5a33114ba1d40cb34364e81, type: 3}
-  m_Name: Size
+  m_Name: Metabolism
   m_EditorClassIdentifier: 
-  Id: Size
-  DisplayName: Size
-  Description: Ant's size (1 is normal size)
-  DefaultValue: 1
-  MinValue: 0.1
-  MaxValue: 10
+  Id: Metabolism
+  DisplayName: Metabolism
+  Description: Energy Efficiency
+  DefaultValue: 0.005
+  MinValue: 0
+  MaxValue: 1
   EnergyCostPerUnit: 0
-  BaseMutationRate: 0.1
-  BaseMutationStrength: 0.05
+  BaseMutationRate: 0.00001
+  BaseMutationStrength: 0.0001

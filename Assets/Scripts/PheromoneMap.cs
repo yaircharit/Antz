@@ -18,7 +18,7 @@ public class PheromoneMap : MonoBehaviour
     [SerializeField] private float ExplorationAngle = 20f;
 
     [Header("Pheromone Colors")]
-    [SerializeField] private Color[] PheromoneColors = {
+    [SerializeField] public Color[] PheromoneColors = {
         Color.clear,
         Color.red,   // Food
         Color.blue,  // Home
