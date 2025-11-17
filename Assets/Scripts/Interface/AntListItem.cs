@@ -18,6 +18,7 @@ namespace Assets.Scripts.Interface
         [SerializeField] private Image background;
 
         private Action OnSelect;
+        private Action OnRightClick;
 
         private Coroutine flashCoroutine;
 
@@ -48,7 +49,9 @@ namespace Assets.Scripts.Interface
             {
                 antStatus.color = state.StateColor;
             };
+            
             OnSelect += ant.RaiseOnSelected;
+            OnRightClick += () => GenomeWindow.Instance.ShowAnt(ant);
         }
 
         public void UpdateHealth(float currentHealth)
@@ -68,6 +71,7 @@ namespace Assets.Scripts.Interface
         public void Deselect(Color baseColor)
         {
             background.color = baseColor;
+            GenomeWindow.Instance.Hide();
         }
 
         public IEnumerator FlashColor(Color color, float duration)
@@ -88,6 +92,11 @@ namespace Assets.Scripts.Interface
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
             OnSelect?.Invoke();
+
+            if (eventData.button == PointerEventData.InputButton.Right)
+            {
+                OnRightClick?.Invoke();
+            }
         }
     }
 }

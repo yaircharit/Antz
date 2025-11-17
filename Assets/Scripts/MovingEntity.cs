@@ -17,7 +17,7 @@ public abstract class MovingEntity : MonoBehaviour
     public float currentHealth; // Current health of the ant, can be used for health management
     public float currentEnergy; // Current energy of the ant, can be used for energy management
 
-    protected Genome genome; // Genome of the ant, can be used for genetic algorithms or traits
+    public Genome genome { get; protected set; } // Genome of the ant, can be used for genetic algorithms or traits
     public float MaxHealth { get { return genome.MaxHealth; } }
     public float MaxEnergy { get { return genome.MaxEnergy; } }
     public GameObject CarriedObj { get; protected set; }
