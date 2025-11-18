@@ -44,7 +44,7 @@ public class PheromoneMapMeshRenderer : MonoBehaviour
             {
                 if (phero.Value <= 0) continue;
 
-                AddQuad(phero.Position +Vector3.up*0.1f, phero.Color, ref index);
+                AddQuad(phero.Position, phero.Color, ref index);
             }
         }
 
@@ -58,12 +58,13 @@ public class PheromoneMapMeshRenderer : MonoBehaviour
     private void AddQuad(Vector3 pos, Color c, ref int index)
     {
         float half = cellSize * 0.5f;
+        float yOffset = 0.1f;
 
         // Quad on floor (XZ plane)
-        verts.Add(new Vector3(pos.x - half, pos.y, pos.z - half));
-        verts.Add(new Vector3(pos.x - half, pos.y, pos.z + half));
-        verts.Add(new Vector3(pos.x + half, pos.y, pos.z + half));
-        verts.Add(new Vector3(pos.x + half, pos.y, pos.z - half));
+        verts.Add(new Vector3(pos.x - half, pos.y + yOffset, pos.z - half));
+        verts.Add(new Vector3(pos.x - half, pos.y + yOffset, pos.z + half));
+        verts.Add(new Vector3(pos.x + half, pos.y + yOffset, pos.z + half));
+        verts.Add(new Vector3(pos.x + half, pos.y + yOffset, pos.z - half));
 
         colors.Add(c);
         colors.Add(c);

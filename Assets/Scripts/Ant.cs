@@ -38,7 +38,7 @@ public class Ant : MovingEntity
             Debug.LogError("No ColonyManagement found in scene!");
         }
 
-        currentPheromoneDepositValue = PheromoneMap.Instance.ACOConfig.DepositValue; // Initialize pheromone deposit value
+        currentPheromoneDepositValue = genome["ACO_PheromoneDepositValue"].Value; // Initialize pheromone deposit value
     }
 
     void Start()
@@ -46,12 +46,13 @@ public class Ant : MovingEntity
         ChangeState(new ExploreState(this, PheromoneType.Home));
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        // TODO: should it be every Update?
+        // TODO: should it be every FixedUpdate?
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
+            ChangeState(new ExploreState(this));
             transform.SetPositionAndRotation(Colony.NestPos + Vector3.up * 3, Quaternion.Euler(0, 0, 0));
             ResetPheromoneDepositRate();
         }
@@ -127,7 +128,7 @@ public class Ant : MovingEntity
     {
         if (type == PheromoneType.None) return; // No pheromone to remove
 
-        foreach (var phero in PheromoneMap.GetPheromones(transform.position, ACO.Instance.DetectionDistance, type))
+        foreach (var phero in PheromoneMap.GetPheromones(transform.position, genome["ACO_PheromoneDetectionDistance"].Value, type))
         {
             PheromoneMap.RemovePheromone(phero);
         }
@@ -139,12 +140,12 @@ public class Ant : MovingEntity
     {
         Vector3 res;
 
-        currentPhero = PheromoneMap.GetMaxPheromone(type, transform.position);
+        currentPhero = PheromoneMap.GetMaxPheromone(type, transform.position, genome["ACO_PheromoneDetectionDistance"].Value);
         if (currentPhero != null)
         {
             // Move towards pheromone marker
             res = GetDirectionTo(currentPhero.Position);
-            if (Random.value < ACO.Instance.ExplorationRate)
+            if (Random.value < genome["ACO_ExplorationRate"].Value)
             {
                 // Randomly explore around the pheromone
                 res = GetRandomDirection(res);
@@ -161,17 +162,17 @@ public class Ant : MovingEntity
 
     public void ResetPheromoneDepositRate()
     {
-        currentPheromoneDepositValue = PheromoneMap.Instance.ACOConfig.DepositValue;// * genome.traits.Size;
+        currentPheromoneDepositValue = genome["ACO_PheromoneDepositValue"].Value;// * genome.traits.Size;
     }
 
     public void ReducePheromone()
     {
-        currentPheromoneDepositValue -= CurrentSpeed * ACO.Instance.DecayFactor * Time.deltaTime; // Decrease pheromone deposit rate over time
+        currentPheromoneDepositValue -= CurrentSpeed * PheromoneMap.Instance.PheromoneDecayFactor* Time.deltaTime; // Decrease pheromone deposit rate over time
     }
 
     public bool LowOnPheromones()
     {
-        return currentPheromoneDepositValue <= ACO.Instance.DecayFactor * 2; // Check if pheromone deposit rate is below the minimum threshold
+        return currentPheromoneDepositValue <= PheromoneMap.Instance.PheromoneDecayFactor * 2; // Check if pheromone deposit rate is below the minimum threshold
     }
 
     public void Eat(float amount = 1, float foodValue = 10)
@@ -207,7 +208,7 @@ public class Ant : MovingEntity
     public bool FoundPheromone(PheromoneType type)
     {
         // Check if the ant has found a pheromone of the specified type within its view distance
-        var pheromones = PheromoneMap.GetPheromones(transform.position, ACO.Instance.DetectionDistance, type);
+        var pheromones = PheromoneMap.GetPheromones(transform.position, genome["ACO_PheromoneDetectionDistance"].Value, type);
         return pheromones.Length > 0;
     }
 

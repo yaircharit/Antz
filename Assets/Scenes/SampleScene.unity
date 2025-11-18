@@ -1539,9 +1539,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 1760571042}
-  PheromoneDepositValue: 0.5
-  PheromoneDecayFactor: 0.0001
-  PheromoneDetectionDistance: 2
+  PheromoneDepositValue: 1
+  PheromoneDecayFactor: 0.01
+  PheromoneDetectionDistance: 3
   ExplorationRate: 0.3
   ExplorationAngle: 20
   PheromoneColors:
@@ -1574,14 +1574,14 @@ MeshRenderer:
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 600d2b5efab801047b4c007508718ef0, type: 2}
+  - {fileID: 2100000, guid: 3b64e479c072f7241b3fd989cbdac5f9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

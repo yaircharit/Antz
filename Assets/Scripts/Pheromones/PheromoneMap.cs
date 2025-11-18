@@ -1,39 +1,30 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
 public class PheromoneMap : MonoBehaviour
 {
     public static PheromoneMap Instance { get; private set; }
-    public Vector3 Center { get; private set; } = Vector3.zero;
-
     private Dictionary<PheromoneType, Dictionary<Vector3Int, Pheromone>> pheromoneGrids;
 
     [Header("Map Components")]
     [SerializeField] private PheromoneMapMeshRenderer meshRenderer;
 
     [Header("ACO Configuration")]
-    [SerializeField] private float PheromoneDepositValue = 0.5f;
-    [SerializeField] private float PheromoneDecayFactor = 0.0001f; // How much pheromone decays per second
-    [SerializeField] private float PheromoneDetectionDistance = 2;
-    [SerializeField] private float ExplorationRate = 0.3f;
-    [SerializeField] private float ExplorationAngle = 20f;
+    [SerializeField] public float PheromoneDecayFactor = 0.0001f; // How much pheromone decays per second
 
     [Header("Pheromone Colors")]
-    [SerializeField] public Color[] PheromoneColors = {
+    [SerializeField]
+    public Color[] PheromoneColors = {
         Color.clear,
         Color.red,   // Food
         Color.blue,  // Home
     };
 
-    public ACO ACOConfig { get; private set; } //TODO: Make SO and fix logic, maybe decouple some things
-
-
     void Awake()
     {
         Instance = Instance != null ? Instance : this;
-
-        ACOConfig ??= new(PheromoneDepositValue, PheromoneDecayFactor, PheromoneDetectionDistance, ExplorationRate, ExplorationAngle);
 
         if (meshRenderer == null)
             meshRenderer = GetComponent<PheromoneMapMeshRenderer>();
@@ -84,7 +75,7 @@ public class PheromoneMap : MonoBehaviour
         {
             foreach (var phero in grid.Values)
             {
-                if (phero.Decay(ACOConfig.DecayFactor) <= 0)
+                if (phero.Decay(PheromoneDecayFactor) <= 0)
                 {
                     toRemove.Add(phero);
                 }
@@ -133,19 +124,19 @@ public class PheromoneMap : MonoBehaviour
         return res;
     }
 
-    public Pheromone GetMinPheromone(PheromoneType type, Vector3 center)
+    public Pheromone GetMinPheromone(PheromoneType type, Vector3 center, float distance)
     {
-        return GetPheromone(type, center, (phero1, phero2) => phero1.Value < phero2.Value);
+        return GetPheromone(type, center, distance, (phero1, phero2) => phero1.Value < phero2.Value);
     }
-    public Pheromone GetMaxPheromone(PheromoneType type, Vector3 center)
+    public Pheromone GetMaxPheromone(PheromoneType type, Vector3 center, float distance)
     {
-        return GetPheromone(type, center, (phero, resPhero) => phero.Value > resPhero.Value);
+        return GetPheromone(type, center,distance, (phero, resPhero) => phero.Value > resPhero.Value);
     }
 
-    public Pheromone GetPheromone(PheromoneType type, Vector3 center, System.Func<Pheromone, Pheromone, bool> comperator, float range = 0)
+    public Pheromone GetPheromone(PheromoneType type, Vector3 center, float distance, System.Func<Pheromone, Pheromone, bool> comperator, float range = 0)
     {
         Pheromone resPhero = null;
-        foreach (var phero in GetPheromones(center, (range > 0) ? range : PheromoneDetectionDistance, type))
+        foreach (var phero in GetPheromones(center, (range > 0) ? range : distance, type))
         {
             if ((resPhero == null || comperator(phero, resPhero)))
             {

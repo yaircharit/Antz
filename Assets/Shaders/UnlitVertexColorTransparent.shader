@@ -1,11 +1,13 @@
-Shader "Custom/UnlitVertexColor"
+Shader "Custom/UnlitVertexColorTransparent"
 {
     Properties
     {
+        _Alpha ("Alpha Multiplier", Range(0,1)) = 1
     }
+
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "Queue"="Transparent" "RenderType"="Transparent" }
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite Off
         Lighting Off
@@ -16,7 +18,6 @@ Shader "Custom/UnlitVertexColor"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            #include "UnityCG.cginc"
 
             struct appdata
             {
@@ -30,15 +31,18 @@ Shader "Custom/UnlitVertexColor"
                 float4 color : COLOR;
             };
 
+            float _Alpha;
+
             v2f vert(appdata v)
             {
                 v2f o;
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.color = v.color;
+                o.color.a *= _Alpha;   // allow fading
                 return o;
             }
 
-            float4 frag(v2f i) : SV_Target
+            fixed4 frag(v2f i) : SV_Target
             {
                 return i.color;
             }

@@ -129,12 +129,12 @@ public abstract class MovingEntity : MonoBehaviour
     }
     public Vector3 GetRandomDirection(Vector3 direction)
     {
-        return GetRandomDirection(direction, ACO.Instance.ExplorationAngle);
+        return GetRandomDirection(direction, genome["ACO_ExplorationAngle"].Value);
     }
 
     public Vector3 GetRandomDirection()
     {
-        return GetRandomDirection(ACO.Instance.ExplorationAngle);
+        return GetRandomDirection(genome["ACO_ExplorationAngle"].Value);
     }
 
     public Transform FindNearest(LayerMask layer, float range)
@@ -351,7 +351,7 @@ public abstract class MovingEntity : MonoBehaviour
     protected virtual void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, ACO.Instance.DetectionDistance);
+        Gizmos.DrawWireSphere(transform.position, genome["ACO_PheromoneDetectionDistance"].Value);
         Gizmos.DrawLine(transform.position, transform.position + transform.forward);
         if (Target != null)
         {
