@@ -30,6 +30,13 @@ public class FoundFoodState : TrackPheromonesState
             return;
 
         ant.Pickup(other.transform);
+
+        if (ant.CurrentHealth < ant.MaxHealth)
+        {
+            ant.ChangeState(new OutHealingState(ant));
+            return;
+        }
+
         if (!ant.IsFull)
         {
             ant.Eat(); // Eat some of the food until full

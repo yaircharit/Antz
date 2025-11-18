@@ -26,18 +26,18 @@ namespace Assets.Scripts.Interface
         {
             antNameText.text = ant.Name;
             healthBar.maxValue = ant.MaxHealth;
-            healthBar.value = ant.currentHealth;
+            healthBar.value = ant.CurrentHealth;
             energyBar.maxValue = ant.MaxEnergy;
-            energyBar.value = ant.currentEnergy;
+            energyBar.value = ant.CurrentEnergy;
 
-            ant.OnEnergyChanged += (_) => UpdateEnergy(ant.currentEnergy);
+            ant.OnEnergyChanged += (_) => UpdateEnergy(ant.CurrentEnergy);
 
-            ant.OnDamageTaken += (_) => UpdateHealth(ant.currentHealth);
+            ant.OnDamageTaken += (_) => UpdateHealth(ant.CurrentHealth);
             ant.OnDamageTaken += (_) => {
                 flashCoroutine ??= StartCoroutine(FlashColor(MovingEntity.damageColor, MovingEntity.damageFlashDuration));
                 };
 
-            ant.OnHealed += (_) => UpdateHealth(ant.currentHealth);
+            ant.OnHealed += (_) => UpdateHealth(ant.CurrentHealth);
             ant.OnHealed += (_) => {
                 flashCoroutine ??= StartCoroutine(FlashColor(MovingEntity.healColor, MovingEntity.healFlashDuration));
             };

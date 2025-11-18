@@ -2,7 +2,7 @@ using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class ExploreState : StateBase
+public class ExploreState : BaseState
 {
     public override Color StateColor => Color.blue;
 
@@ -27,10 +27,13 @@ public class ExploreState : StateBase
             return;
         }
 
-        
-
         ant.Wander();
         ant.DropPheromone(pheroDropType);
+    }
+
+    public override float GetEnergyModifier()
+    {
+        return ant.CurrentSpeed;
     }
 
 

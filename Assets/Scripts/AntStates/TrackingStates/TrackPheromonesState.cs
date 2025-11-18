@@ -1,6 +1,6 @@
 
 
-public class TrackPheromonesState : StateBase
+public class TrackPheromonesState : BaseState
 {
     public override UnityEngine.Color StateColor => UnityEngine.Color.black;
 
@@ -13,5 +13,10 @@ public class TrackPheromonesState : StateBase
     {
         ant.Move(pheroTargetType);
         ant.DropPheromone(pheroDropType);
+    }
+
+    public override float GetEnergyModifier()
+    {
+        return ant.CurrentSpeed;
     }
 }

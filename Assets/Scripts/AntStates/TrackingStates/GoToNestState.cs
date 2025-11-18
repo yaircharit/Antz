@@ -25,6 +25,12 @@ public class GoToNestState : TrackPheromonesState
                 return;
             }
 
+            if (ant.CurrentHealth < ant.MaxHealth)
+            {
+                ant.ChangeState(new NestHealingState(ant));
+                return;
+            }
+
             ant.ChangeState(new ExploreState(ant)); // If not hungry, seek food
             return;
         }

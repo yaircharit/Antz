@@ -46,10 +46,9 @@ public class Ant : MovingEntity
         ChangeState(new ExploreState(this, PheromoneType.Home));
     }
 
-    public float updateInterval = 0.5f; // Interval in seconds to update the ant's state
-    private float timeSinceLastUpdate = 0f;
-    void FixedUpdate()
+    void Update()
     {
+        // TODO: should it be every Update?
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
@@ -58,12 +57,6 @@ public class Ant : MovingEntity
         }
 
         currentState?.Tick();
-
-        // Check if it's time to update the ant's vitals
-        if (Time.time - timeSinceLastUpdate < updateInterval) return;
-        timeSinceLastUpdate = Time.time;
-
-        CheckVitals(); // Check the ant's vitals (health, energy, etc.) every frame
     }
 
     private void OnMouseDown()
@@ -106,11 +99,11 @@ public class Ant : MovingEntity
             targetDirection = GetPheromoneDirections(type);
         }
         targetDirection.y = 0; // Keep movement in the horizontal plane
-        MoveTowards(targetDirection, currentSpeed);
+        MoveTowards(targetDirection, CurrentSpeed);
 
         if (Time.time - lastStuckTime > 1f)
         {
-            isStuck = GetDistanceTo(lastPosition) < 0.01f * currentSpeed;
+            isStuck = GetDistanceTo(lastPosition) < 0.01f * CurrentSpeed;
             lastStuckTime = Time.time; // Update last stuck time
             lastPosition = transform.position; // Update last position
         }
@@ -173,7 +166,7 @@ public class Ant : MovingEntity
 
     public void ReducePheromone()
     {
-        currentPheromoneDepositValue -= currentSpeed * ACO.Instance.DecayFactor * Time.deltaTime; // Decrease pheromone deposit rate over time
+        currentPheromoneDepositValue -= CurrentSpeed * ACO.Instance.DecayFactor * Time.deltaTime; // Decrease pheromone deposit rate over time
     }
 
     public bool LowOnPheromones()
@@ -220,6 +213,7 @@ public class Ant : MovingEntity
 
     public bool FindFood()
     {
+        if (IsCarrying) return true;
         // Check if the ant has found food within its view distance
         Target = FindNearest(LayerMask.GetMask("Food"), genome["ViewDistance"].Value);
         return Target != null;
@@ -233,6 +227,6 @@ public class Ant : MovingEntity
     internal void Wander()
     {
         Vector3 randomDirection = GetRandomDirection();
-        MoveTowards(randomDirection, currentSpeed);
+        MoveTowards(randomDirection, CurrentSpeed);
     }
 }

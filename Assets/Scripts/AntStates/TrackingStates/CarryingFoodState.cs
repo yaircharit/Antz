@@ -34,4 +34,9 @@ public class CarryingFoodState : GoToNestState
 
         base.Tick();
     }
+
+    public override float GetEnergyModifier()
+    {
+        return base.GetEnergyModifier() * Mathf.Min(1, ant.CarriedMass / ant.genome.EffectiveStrength);
+    }
 }
