@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Ant : MovingEntity
 {
-    public override string Name { get; protected set; } = "Ant"; // Name of the ant, can be used for identification
+    public override string Name { get; set; } = "Ant"; // Name of the ant, can be used for identification
     public new static int Count { get; protected set; } = 0; // Static counter to keep track of the number of ants
 
     public static Ant SelectedAnt { get; internal set; } = null;
@@ -27,11 +27,11 @@ public class Ant : MovingEntity
         OnDeselected += Deselect;
     }
 
-    public void Init(AntColony antColony)
+    public void Init(AntColony antColony, Genome genome)
     {
         ID = Count++; // Increment the static ant count
 
-        base.Init();
+        base.Init(genome);
         Colony = antColony;
         if (Colony == null)
         {

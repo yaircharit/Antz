@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class MovingEntity : MonoBehaviour
 {
-    public virtual string Name { get; protected set; } = "MovingEntity"; // Name of the ant, can be used for identification
+    public virtual string Name { get; set; } = "MovingEntity"; // Name of the ant, can be used for identification
     public int ID { get; protected set; } = -1; // Unique ID for the ant, can be used for identification
     public static int Count { get; protected set; } = 0; // Static counter to keep track of the number of ants
 
@@ -65,7 +65,7 @@ public abstract class MovingEntity : MonoBehaviour
     public event System.Action<BaseState> OnStateChanged;
 
 
-    public virtual void Init()
+    public virtual void Init(Genome genes)
     {
         ID = Count++; // Increment the static ant count
         Name = $"{Name}_{ID}"; // Set the name based on the ID
@@ -84,8 +84,7 @@ public abstract class MovingEntity : MonoBehaviour
 
         OnKilled += Kill;
 
-        genome = new Genome(); // Initialize genome with default values
-        genome.Mutate(true); // Mutate the genome to get random traits
+        genome = genes;
 
         transform.localScale = Vector3.one * genome["Size"].Value; // Set the scale of the ant based on size trait
         CurrentSpeed = genome.EffectiveSpeed; // Initialize current speed based on genome
@@ -283,7 +282,7 @@ public abstract class MovingEntity : MonoBehaviour
         // TODO: Visual indication, than die
         OnDeselected?.Invoke();
         Debug.Log(this + " is dead!");
-        
+
         Destroy(gameObject);
     }
 

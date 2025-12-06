@@ -37,6 +37,7 @@ public class Genome
         {
             Traits[traitDef.Id] = new GenomeTrait(traitDef);
         }
+        UpdateEffectiveStats();
     }
 
 

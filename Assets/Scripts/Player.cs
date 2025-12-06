@@ -15,7 +15,6 @@ public class Player : MonoBehaviour
     [Header("UI")]
     [SerializeField] private GameObject pauseMenuPrefab;
     private GameObject pauseMenuInstance;
-    public TMP_Text foodScoreText;
 
     private Rigidbody rb;
     private Camera playerCamera;
