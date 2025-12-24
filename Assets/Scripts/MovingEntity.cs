@@ -143,8 +143,7 @@ public abstract class MovingEntity : MonoBehaviour
         Transform nearestObj = null;
         foreach (Collider col in nearbyObjects)
         {
-            float distance = GetDistanceTo(col.transform);
-            if (IsInView(col.transform) && distance < closestDistance)
+            if (IsInView(col.transform) && GetDistanceTo(col.transform, out float distance) < closestDistance)
             {
                 closestDistance = distance;
                 nearestObj = col.transform;
@@ -161,6 +160,16 @@ public abstract class MovingEntity : MonoBehaviour
     public float GetDistanceTo(Vector3 targetPosition)
     {
         return (transform.position - targetPosition).magnitude;
+    }
+    public float GetDistanceTo(Transform target, out float res)
+    {
+        return GetDistanceTo(target.position, out res);
+    }
+
+    public float GetDistanceTo(Vector3 targetPosition, out float res)
+    {
+        res = (transform.position - targetPosition).magnitude;
+        return res;
     }
 
     public bool IsInRange(Vector3 target, float range)
@@ -347,11 +356,40 @@ public abstract class MovingEntity : MonoBehaviour
         currentState?.OnCollisionEnter(collision);
     }
 
+    /* PSEUDOCODE / PLAN:
+    - When gizmos are selected, draw existing pheromone detection sphere (as before).
+    - If genome exists:
+        - Read viewDistance = genome["ViewDistance"].Value
+        - Read viewAngle = genome["ViewAngle"].Value
+        - Draw a wire sphere at transform.position with radius = viewDistance (visualize range)
+        - Compute left and right boundary directions by rotating transform.forward by ±viewAngle/2 around Y.
+        - Draw rays/lines from position to position + boundaryDir * viewDistance to show boundaries.
+        - Draw a segmented arc between left and right bound at radius = viewDistance:
+            - Choose a number of segments (e.g., 20)
+            - Iterate from left angle to right angle, compute points on circumference and draw lines between consecutive points
+    - Fall back gracefully if genome is null: still draw a forward line and pheromone sphere if possible.
+    - Preserve existing Target and TargetPosition gizmo drawing.
+    */
+
     protected virtual void OnDrawGizmosSelected()
     {
+        // Draw pheromone detection sphere if genome available, else skip that specific value
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, genome["ACO_PheromoneDetectionDistance"].Value);
-        Gizmos.DrawLine(transform.position, transform.position + transform.forward);
+
+        // Draw view range (sphere) and view angle (arc + boundary lines)
+        float viewDistance = genome["ViewDistance"].Value;
+        float viewAngle = genome["ViewAngle"].Value;
+
+        // Boundary directions
+        Vector3 leftDir = Quaternion.Euler(0f, -viewAngle * 0.5f, 0f) * transform.forward;
+        Vector3 rightDir = Quaternion.Euler(0f, viewAngle * 0.5f, 0f) * transform.forward;
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(transform.position, transform.position + leftDir * viewDistance);
+        Gizmos.DrawLine(transform.position, transform.position + rightDir * viewDistance);
+
+        // Preserve target gizmos
         if (Target != null)
         {
             Gizmos.color = Color.green;

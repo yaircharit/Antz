@@ -58,7 +58,7 @@ public class PheromoneMap : MonoBehaviour
     public void RemovePheromone(Pheromone pheromone)
     {
         RemovePheromone(pheromone.Position, pheromone.Type);
-    }
+    }               
     public void RemovePheromone(Vector3 worldPos, PheromoneType type)
     {
         Vector3Int gridPos = Round(worldPos);

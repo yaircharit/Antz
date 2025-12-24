@@ -753,7 +753,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AntPrefab: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
   NestSize: 2
-  AntsObject: {fileID: 2396173987763848551}
+  AntsContainer: {fileID: 2396173987763848551}
   antsListWindow: {fileID: 695781587640198375}
   foodScoreText: {fileID: 1006575401854944227}
   foodScore: 0

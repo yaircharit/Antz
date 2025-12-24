@@ -1,7 +1,3 @@
-using Assets.Scripts.Interface;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Search;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -24,7 +20,5 @@ public class GameManager : MonoBehaviour
             currAntGenome.Mutate(true);
             colony.SpawnAnt(currAntGenome);
         }
-    }
-
-    
+    }  
 }
