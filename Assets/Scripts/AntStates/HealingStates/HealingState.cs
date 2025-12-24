@@ -14,7 +14,7 @@ public class HealingState : BaseState
 
     public override float GetEnergyModifier()
     {
-        return healingCostModifier * ant.genome.HealingRate;
+        return healingCostModifier * ant.HealingRate;
     }
 
     public override void Tick()

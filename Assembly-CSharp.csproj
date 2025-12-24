@@ -60,9 +60,11 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.62f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\QueenAnt.cs" />
     <Compile Include="Assets\Scripts\AntStates\TrackingStates\TrackPheromonesState.cs" />
     <Compile Include="Assets\Scripts\AntStates\HealingStates\HealingState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
+    <Compile Include="Assets\Scripts\AntStates\BaseQueenState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />

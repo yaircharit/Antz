@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -10,15 +11,13 @@ public class GameManager : MonoBehaviour
     {
         colony = Instantiate(ColonyPrefab);
 
-        var queen = colony.SpawnAnt(GameSetup.queenGenome, true);
+        var queen = colony.SpawnQueen(GameSetup.queenGenome);
         int startingAntsCount = (int)queen.genome["OffspringCount"].Value;
 
 
         for (int i = 0; i < startingAntsCount; i++)
         {
-            Genome currAntGenome = queen.genome.Clone();
-            currAntGenome.Mutate(true);
-            colony.SpawnAnt(currAntGenome);
+            queen.SpawnChild();
         }
     }  
 }

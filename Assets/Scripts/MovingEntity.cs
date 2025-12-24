@@ -18,8 +18,14 @@ public abstract class MovingEntity : MonoBehaviour
     public float CurrentEnergy { get; protected set; } // Current energy of the ant, can be used for energy management
 
     public Genome genome { get; protected set; } // Genome of the ant, can be used for genetic algorithms or traits
-    public float MaxHealth { get { return genome.MaxHealth; } }
-    public float MaxEnergy { get { return genome.MaxEnergy; } }
+
+    protected static readonly float BaseHealth = 100f;
+    protected static readonly float BaseEnergy = 100f;
+    public float EffectiveSpeed;
+    public float EffectiveStrength;
+    public float HealingRate;
+    public float MaxHealth { get; protected set; }
+    public float MaxEnergy { get; protected set; }
     public GameObject CarriedObj { get; protected set; }
     public float CarriedMass { get; protected set; } = 0f; // Mass of the carried object, used to calculate speed when carrying food
 
@@ -42,7 +48,7 @@ public abstract class MovingEntity : MonoBehaviour
         set { Target = null; _targetPosition = value; }
     }
 
-    public BaseState currentState;
+    public virtual BaseState currentState { get; protected set; }
     protected Vector3 lastPosition;
 
     protected MeshRenderer meshRenderer;
@@ -86,14 +92,27 @@ public abstract class MovingEntity : MonoBehaviour
 
         genome = genes;
 
-        transform.localScale = Vector3.one * genome["Size"].Value; // Set the scale of the ant based on size trait
-        CurrentSpeed = genome.EffectiveSpeed; // Initialize current speed based on genome
-        CurrentHealth = genome.MaxHealth; // Initialize current health
-        CurrentEnergy = genome.MaxEnergy;
+        UpdateEffectiveStats();
+        CurrentSpeed = EffectiveSpeed;
+        CurrentHealth = MaxHealth;
+        CurrentEnergy = MaxEnergy;
 
         transform.rotation = Quaternion.Euler(0, Random.value * 360f, 0); // Randomize initial rotation
         lastPosition = transform.position; // Store the initial position as last position
     }
+    protected virtual void UpdateEffectiveStats(float sizeModifier = 0)
+    {
+        if (sizeModifier == 0)
+            sizeModifier = genome["Size"].Value;
+
+        transform.localScale = Vector3.one * sizeModifier; // Set the scale of the ant based on size trait
+        EffectiveSpeed = genome["Speed"].Value / sizeModifier;
+        EffectiveStrength = genome["Strength"].Value * sizeModifier;
+        MaxHealth = BaseHealth * sizeModifier;
+        MaxEnergy = BaseEnergy * sizeModifier;
+        HealingRate = MaxHealth * genome["Metabolism"].Value;
+    }
+
 
     public void ChangeState(BaseState newState)
     {
@@ -109,7 +128,7 @@ public abstract class MovingEntity : MonoBehaviour
         var distance = speed * Time.fixedDeltaTime * targetDirection;
         transform.position += distance;
 
-        ReduceEnergy(GetEnergyCost() * Time.fixedDeltaTime); // Decrease energy with each movement
+        ReduceEnergy(); // Decrease energy with each movement
     }
 
     public Vector3 GetDirectionTo(Vector3 targetPosition)
@@ -200,7 +219,7 @@ public abstract class MovingEntity : MonoBehaviour
             CarriedMass = rb.mass;
 
             // !! SPEED ADJUSTMENT !!   normal speed / carrrying multiplier (1 is normal speed, 0.5 is half speed, etc.)
-            CurrentSpeed = (genome.EffectiveSpeed) / Mathf.Max(1, CarriedMass / genome.EffectiveStrength * CarrySpeedModifier); // Adjust speed based on carried mass
+            CurrentSpeed = EffectiveSpeed / Mathf.Max(1, CarriedMass / EffectiveStrength * CarrySpeedModifier); // Adjust speed based on carried mass
 
             return true;
         }
@@ -237,9 +256,15 @@ public abstract class MovingEntity : MonoBehaviour
             CarriedMass = 0f;
 
             // !! SPEED ADJUSTMENT !!
-            CurrentSpeed = genome.EffectiveSpeed; // Reset speed to normal when not carrying anything
+            CurrentSpeed = EffectiveSpeed; // Reset speed to normal when not carrying anything
         }
     }
+
+    public void ReduceEnergy()
+    {
+        ReduceEnergy(GetEnergyCost() * Time.deltaTime);
+    }
+
 
     public void ReduceEnergy(float amount)
     {
@@ -348,28 +373,13 @@ public abstract class MovingEntity : MonoBehaviour
 
     public void RaiseOnHealed()
     {
-        OnHealed?.Invoke(genome.HealingRate);
+        OnHealed?.Invoke(HealingRate);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         currentState?.OnCollisionEnter(collision);
     }
-
-    /* PSEUDOCODE / PLAN:
-    - When gizmos are selected, draw existing pheromone detection sphere (as before).
-    - If genome exists:
-        - Read viewDistance = genome["ViewDistance"].Value
-        - Read viewAngle = genome["ViewAngle"].Value
-        - Draw a wire sphere at transform.position with radius = viewDistance (visualize range)
-        - Compute left and right boundary directions by rotating transform.forward by ±viewAngle/2 around Y.
-        - Draw rays/lines from position to position + boundaryDir * viewDistance to show boundaries.
-        - Draw a segmented arc between left and right bound at radius = viewDistance:
-            - Choose a number of segments (e.g., 20)
-            - Iterate from left angle to right angle, compute points on circumference and draw lines between consecutive points
-    - Fall back gracefully if genome is null: still draw a forward line and pheromone sphere if possible.
-    - Preserve existing Target and TargetPosition gizmo drawing.
-    */
 
     protected virtual void OnDrawGizmosSelected()
     {

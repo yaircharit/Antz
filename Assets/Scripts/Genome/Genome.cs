@@ -15,14 +15,6 @@ public class Genome
     public Dictionary<string, GenomeTrait> Traits
         = new Dictionary<string, GenomeTrait>();
 
-    private static readonly float BaseHealth = 100f;
-    private static readonly float BaseEnergy = 100f;
-    public float EffectiveSpeed;
-    public float EffectiveStrength;
-    public float MaxHealth;
-    public float MaxEnergy;
-    public float HealingRate;
-
     public GenomeTrait this[string id]
     {
         get { return Traits[id]; }
@@ -37,7 +29,6 @@ public class Genome
         {
             Traits[traitDef.Id] = new GenomeTrait(traitDef);
         }
-        UpdateEffectiveStats();
     }
 
 
@@ -48,19 +39,9 @@ public class Genome
         {
             clone.Traits[trait.Key] = trait.Value.Clone();
         }
-        UpdateEffectiveStats();
         return clone;
     }
 
-    public void UpdateEffectiveStats()
-    {
-        float sizeModifier = Traits["Size"].Value;
-        EffectiveSpeed = Traits["Speed"].Value / sizeModifier;
-        EffectiveStrength = Traits["Strength"].Value * sizeModifier;
-        MaxHealth = BaseHealth * sizeModifier;
-        MaxEnergy = BaseEnergy * sizeModifier;
-        HealingRate = MaxHealth * Traits["Metabolism"].Value;
-    }
 
     public float GetEnergyCost()
     {
@@ -81,7 +62,6 @@ public class Genome
         {
             trait.Mutate(forceMutation);
         }
-        UpdateEffectiveStats();
     }
 }
 
