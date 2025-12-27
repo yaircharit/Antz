@@ -64,7 +64,6 @@
     <Compile Include="Assets\Scripts\AntStates\TrackingStates\TrackPheromonesState.cs" />
     <Compile Include="Assets\Scripts\AntStates\HealingStates\HealingState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
-    <Compile Include="Assets\Scripts\AntStates\BaseQueenState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
@@ -107,7 +106,9 @@
     <Compile Include="Assets\Scripts\Pheromones\Pheromone.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\Scripts\Genome\GenomeTraitDefinition.cs" />
+    <Compile Include="Assets\Scripts\AntStates\QueenStates\QueenHealingState.cs" />
     <Compile Include="Assets\Scripts\MovingEntity.cs" />
+    <Compile Include="Assets\Scripts\AntStates\QueenStates\BaseQueenState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />

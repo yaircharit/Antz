@@ -33,7 +33,5 @@ public class HealingState : BaseState
         {
             ant.Eat();
         }
-
-
     }
 }

@@ -9,7 +9,7 @@ namespace Assets.Scripts.AntStates
 {
     public class BaseQueenState : BaseState
     {
-        public BaseQueenState(QueenAnt ant, PheromoneType type = PheromoneType.None) : base(ant, type)
+        public BaseQueenState(QueenAnt ant, PheromoneType type = PheromoneType.Nest) : base(ant, type)
         {
         }
 
@@ -23,7 +23,15 @@ namespace Assets.Scripts.AntStates
         public override void Tick()
         {
             ant.ReduceEnergy();
+            ant.DropPheromone(pheroDropType);
+            ant.ResetPheromoneDepositRate();
+
             // TODO: Implement queen-specific behavior
+            if (!ant.IsFull && ant.Colony.HasFood)
+            {
+                ant.Eat(); // If hungry, eat food in nest
+                return;
+            }
         }
     }
 }
