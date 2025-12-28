@@ -51,6 +51,8 @@ public class GenomeTrait
             float maxDelta = (Definition.MaxValue - Definition.MinValue) * MutationStrength;
             Value += UnityEngine.Random.Range(-maxDelta, maxDelta);
             Value = Mathf.Clamp(Value, Definition.MinValue, Definition.MaxValue);
+            HereditaryStrength += UnityEngine.Random.Range(-maxDelta, maxDelta);
+            HereditaryStrength = Mathf.Clamp01(HereditaryStrength);
         }
     }
 }

@@ -7,13 +7,11 @@ public class GameSetup : MonoBehaviour
     [SerializeField] Transform genesContainer;
     [SerializeField] GeneSlider genesSliderPrefab;
 
-    public static Genome queenGenome;
+    public static Genome queenGenome = new();
     private List<GeneSlider> sliders = new();
 
     void Start()
     {
-        queenGenome = new();
-
         foreach (var trait in queenGenome.Traits.Values) //TODO: show only genes that can be modified? or disable ones that can't?
         {
             var currTrait = Instantiate(genesSliderPrefab, genesContainer);

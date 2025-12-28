@@ -28,7 +28,7 @@ namespace Assets.Scripts.AntStates.HealingStates
 
             if (ant.CurrentHealth == ant.MaxHealth)
             {
-                ant.ChangeState(new BaseQueenState((QueenAnt)ant));
+                ant.ChangeState(new BaseQueenState(ant));
             }
 
             if (!ant.IsHungry)
@@ -41,7 +41,7 @@ namespace Assets.Scripts.AntStates.HealingStates
             }
             else
             {
-               ant.ChangeState(new BaseQueenState((QueenAnt)ant)); // No food available, switch back to base state //TODO: different state
+               ant.ChangeState(new BaseQueenState(ant)); // No food available, switch back to base state //TODO: different state
             }
         }
     }

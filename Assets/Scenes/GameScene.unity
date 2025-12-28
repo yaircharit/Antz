@@ -258,7 +258,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   appleBlockPrefab: {fileID: 947474979183635148, guid: db60231b168fc80438fecf0107f8b385, type: 3}
-  appleSize: 5
+  appleSize: 9
   blockSpacing: 1
   spawnHeight: 5
   spawnAreaCenter: {x: 0, y: 0}

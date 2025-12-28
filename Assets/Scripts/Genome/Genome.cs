@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -42,6 +38,43 @@ public class Genome
         return clone;
     }
 
+    // Recombine two parent genomes into a child genome.
+    // For each trait we randomly pick one parent's value or average them; copy mutation parameters as averaged.
+    public static Genome Cross(Genome parentA, Genome parentB)
+    {
+        if (parentA == null && parentB == null) return new Genome();
+        if (parentA == null) return parentB.Clone();
+        if (parentB == null) return parentA.Clone();
+
+        Genome child = new Genome();
+
+        foreach (var def in TraitDefinitions)
+        {
+            string id = def.Id;
+            parentA.Traits.TryGetValue(id,out GenomeTrait a );
+            parentB.Traits.TryGetValue(id,out GenomeTrait b );
+
+            GenomeTrait ct = new GenomeTrait();
+
+            if (UnityEngine.Random.Range(0,a.HereditaryStrength) > UnityEngine.Random.Range(0, b.HereditaryStrength))
+                ct = a.Clone();
+            else
+                ct = b.Clone();
+
+            // small chance to average instead to smooth traits
+            if (UnityEngine.Random.value < 0.1f)
+            {
+                ct.Value = (a.Value + b.Value) * 0.5f;
+            }
+
+            // ensure within definition bounds
+            ct.Value = Mathf.Clamp(ct.Value, def.MinValue, def.MaxValue);
+            
+            child.Traits[id] = ct;
+        }
+
+        return child;
+    }
 
     public float GetEnergyCost()
     {

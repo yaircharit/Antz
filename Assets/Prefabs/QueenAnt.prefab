@@ -318,7 +318,7 @@ MonoBehaviour:
   isSelected: 0
   isStuck: 0
   currentPheromoneDepositValue: 0
-  crownPrefab: {fileID: 919132149155446097, guid: 049c1a37351e1874382d7cc1677c8d6d, type: 3}
+  BroodPrefab: {fileID: 341490733422937937, guid: 8221444992865604ea70985eb97f50a0, type: 3}
 --- !u!1001 &4825621105250146338
 PrefabInstance:
   m_ObjectHideFlags: 0
