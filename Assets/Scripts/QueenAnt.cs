@@ -52,7 +52,7 @@ namespace Assets.Scripts
             // The resulting range is now 0 to 3, with a mean of 1.5.
 
             // Normalize the result to a mean of 0 and a range of approx -1.5 to 1.5
-            float avg = (sum / 3f) - 1.5f;
+            float avg = (sum / 3f) - 0.5f;
 
             // Scale and shift the value to fit the desired mean and standard deviation
             return mean + avg * (stdDev * 2f); // Adjust multiplier as needed for desired 'tightness'
@@ -69,6 +69,7 @@ namespace Assets.Scripts
                 Brood b = SpawnBrood(childGenome);
                 ReduceEnergy(GetMatingEnergyCost(b) * ant.GetEnergyCost()); // Mating energy cost
             }
+            Debug.Log($"{numberOfOffspring} broods created!");
         }
 
         public Brood SpawnBrood(Genome broodGenome)

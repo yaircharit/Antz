@@ -5,8 +5,7 @@ using UnityEngine;
 
 public class Genome
 {
-    public static GenomeTraitDefinition[] TraitDefinitions
-        = Resources.LoadAll<GenomeTraitDefinition>("GenomeTraits");
+    public static GenomeTraitDefinition[] TraitDefinitions;
 
     public Dictionary<string, GenomeTrait> Traits
         = new Dictionary<string, GenomeTrait>();
@@ -17,10 +16,27 @@ public class Genome
         set { Traits[id] = value; }
     }
 
+    /// <summary>
+    /// Initialize trait definitions from resources. Call this once at startup before creating Genome instances.
+    /// </summary>
+    public static void InitializeTraitDefinitions()
+    {
+        if (TraitDefinitions == null)
+        {
+            TraitDefinitions = Resources.LoadAll<GenomeTraitDefinition>("GenomeTraits");
+        }
+    }
 
-    //// Constructor to initialize the genome traits with default values or specified values
     public Genome()
     {
+        // Do NOT load resources here — loading during construction (or during deserialization)
+        // can trigger "Recursive Serialization" in WebGL. Require explicit initialization.
+        if (TraitDefinitions == null)
+        {
+            Debug.LogError("Genome: TraitDefinitions are not initialized. Call Genome.InitializeTraitDefinitions() before creating Genome instances.");
+            return;
+        }
+
         foreach (var traitDef in TraitDefinitions)
         {
             Traits[traitDef.Id] = new GenomeTrait(traitDef);
