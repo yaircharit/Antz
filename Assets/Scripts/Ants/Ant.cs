@@ -23,7 +23,7 @@ public class Ant : MovingEntity
         meshRenderer = GetComponentInChildren<MeshRenderer>();
         meshRenderer.material.color = baseColor;
 
-        OnSelected += Select; 
+        OnSelected += Select;
         OnDeselected += Deselect;
     }
 
@@ -150,14 +150,12 @@ public class Ant : MovingEntity
                 // Randomly explore around the pheromone
                 res = GetRandomDirection(res);
             }
+
+            return res;
         }
-        else
-        {
-            // No pheromone found, wander randomly
-            res = GetRandomDirection();
-        }
-        
-        return res;
+
+        // No pheromone found, wander randomly
+        return GetRandomDirection();
     }
 
     public void ResetPheromoneDepositRate()
@@ -167,7 +165,7 @@ public class Ant : MovingEntity
 
     public void ReducePheromone()
     {
-        currentPheromoneDepositValue -= CurrentSpeed * PheromoneMap.Instance.PheromoneDecayFactor* Time.deltaTime; // Decrease pheromone deposit rate over time
+        currentPheromoneDepositValue -= CurrentSpeed * PheromoneMap.Instance.PheromoneDecayFactor * Time.deltaTime; // Decrease pheromone deposit rate over time
     }
 
     public bool LowOnPheromones()
