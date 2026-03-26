@@ -11,7 +11,7 @@ public class AntColony : MonoBehaviour
 
     public float NestSize = 2f; // Size of the nest area, can be set in the inspector or dynamically
 
-    public Vector3 NestPos { get; private set; } = Vector3.zero;
+    public Vector3 NestPos { get; private set; }
     public float NestRadius { get; private set; } = 2f; // Radius around the nest where ants can drop food
 
     [SerializeField] private Transform AntsContainer;
@@ -22,6 +22,13 @@ public class AntColony : MonoBehaviour
     public TMP_Text foodScoreText;
 
     public float foodScore = 0; // Score for the amount of food collected
+
+    private void Awake()
+    {
+        NestPos = Vector3.up * Chunk.floorHeight;
+        NestRadius = NestSize / 2f;
+    }
+
 
     public Ant SpawnAnt(Genome genome)
     {
