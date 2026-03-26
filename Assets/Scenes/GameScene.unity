@@ -140,7 +140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &143326606
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -237,7 +237,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 172167885}
-  - component: {fileID: 172167884}
+  - component: {fileID: 172167886}
   m_Layer: 10
   m_Name: Food
   m_TagString: Untagged
@@ -245,24 +245,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &172167884
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 172167883}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29c167bb5044a524bbd0b461870f1e90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  appleBlockPrefab: {fileID: 947474979183635148, guid: db60231b168fc80438fecf0107f8b385, type: 3}
-  appleSize: 9
-  blockSpacing: 1
-  spawnHeight: 5
-  spawnAreaCenter: {x: 0, y: 0}
-  spawnRadius: 50
 --- !u!4 &172167885
 Transform:
   m_ObjectHideFlags: 0
@@ -278,6 +260,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &172167886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 172167883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0f275b355d15a54db14996772f42f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  appleBlockPrefab: {fileID: 947474979183635148, guid: db60231b168fc80438fecf0107f8b385, type: 3}
+  appleSize: 7
+  blockSpacing: 1
+  spawnHeight: 16
+  spawnAreaCenter: {x: 0, y: 0}
+  spawnRadius: 16
 --- !u!1 &205284890
 GameObject:
   m_ObjectHideFlags: 0
@@ -604,6 +604,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1347579507}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1264425718
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1264425720}
+  - component: {fileID: 1264425719}
+  m_Layer: 0
+  m_Name: World
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1264425719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1264425718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8995b05330e22149af29bed7cb7c981, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockDefinitions: []
+  renderDistance: 5
+--- !u!4 &1264425720
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1264425718}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1347579501
 GameObject:
   m_ObjectHideFlags: 0
@@ -904,7 +950,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2565ac5904b3214488405353ff981f75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ColonyPrefab: {fileID: 7354810836851568925, guid: ea46183c15a0cae428f15a9a1a5d15af, type: 3}
+  world: {fileID: 1264425719}
+  ColonyPrefab: {fileID: 7290239304814972485, guid: ea46183c15a0cae428f15a9a1a5d15af, type: 3}
 --- !u!4 &1770899477
 Transform:
   m_ObjectHideFlags: 0
@@ -1034,3 +1081,4 @@ SceneRoots:
   - {fileID: 205284893}
   - {fileID: 1993764124}
   - {fileID: 1770899477}
+  - {fileID: 1264425720}

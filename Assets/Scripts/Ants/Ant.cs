@@ -46,14 +46,14 @@ public class Ant : MovingEntity
         ChangeState(new ExploreState(this, PheromoneType.Home));
     }
 
-    void FixedUpdate()
+    protected void FixedUpdate()
     {
         // TODO: should it be every FixedUpdate?
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
             ChangeState(new ExploreState(this));
-            transform.SetPositionAndRotation(Colony.NestPos + Vector3.up * 3, Quaternion.Euler(0, 0, 0));
+            transform.SetPositionAndRotation(Colony.NestPos + Vector3.up * Chunk.chunkSize, Quaternion.Euler(0, 0, 0));
             ResetPheromoneDepositRate();
         }
 

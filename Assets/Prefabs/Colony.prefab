@@ -698,7 +698,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2681148307699672548}
   m_HandleRect: {fileID: 7477710629504016805}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -713,7 +713,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8678181924745998586}
-  - component: {fileID: 7354810836851568925}
+  - component: {fileID: 7290239304814972485}
   m_Layer: 0
   m_Name: Colony
   m_TagString: Untagged
@@ -739,7 +739,7 @@ Transform:
   - {fileID: 2970886982467785861}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7354810836851568925
+--- !u!114 &7290239304814972485
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -748,7 +748,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8514922532595462338}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ecb7a523d9eda644958c8e3c3c196eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 692d9a8c36ab1b249b448a1e9aafd287, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   AntPrefab: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
