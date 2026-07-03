@@ -12,6 +12,12 @@ public class GameManager : MonoBehaviour
         Genome.InitializeTraitDefinitions(); // Ensure trait definitions are loaded before creating genomes
     }
 
+    private void Awake()
+    {
+        Genome.InitializeTraitDefinitions(); // Ensure trait definitions are loaded before creating genomes
+        GameSetup.queenGenome ??= new Genome(); // Create the queen genome at startup
+    }
+
     void Start()
     {
         world.RenderChunks(Vector3Int.zero); // Render the initial chunk at the start of the game

@@ -41,7 +41,7 @@ public class PheromoneMap : MonoBehaviour
 
     public Vector3Int Round(Vector3 worldPos)
     {
-        return Vector3Int.FloorToInt(worldPos);
+        return Vector3Int.RoundToInt(worldPos);
     }
 
     public void AddPheromone(Vector3 worldPos, float amount, PheromoneType type)

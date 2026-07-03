@@ -18,6 +18,7 @@ public abstract class MovingEntity : MonoBehaviour
     public float CurrentEnergy { get; protected set; } // Current energy of the ant, can be used for energy management
 
     public Genome genome { get; protected set; } // Genome of the ant, can be used for genetic algorithms or traits
+    public float Size => genome["Size"].Value; // Size trait from the genome, can be used to scale the ant's size and affect other stats
 
     protected static readonly float BaseHealth = 100f;
     protected static readonly float BaseEnergy = 100f;
@@ -121,9 +122,9 @@ public abstract class MovingEntity : MonoBehaviour
         currentState?.Enter();
     }
 
-    public void MoveTowards(Vector3 targetDirection, float speed)
+    public virtual void MoveTowards(Vector3 targetDirection, float speed)
     {
-        if (targetDirection == Vector3.zero) targetDirection = Vector3.forward; // Avoid division by zero or invalid movement
+        if (targetDirection == Vector3.zero) targetDirection = transform.forward; // Avoid division by zero or invalid movement
         transform.forward = targetDirection;
         var distance = speed * Time.fixedDeltaTime * targetDirection;
         transform.position += distance;
@@ -345,7 +346,7 @@ public abstract class MovingEntity : MonoBehaviour
 
     public override string ToString()
     {
-        return $"{Name}<{currentState}>-{GetDistanceTo(lastPosition)}";
+        return $"{Name}<{currentState}>";
     }
 
     public void Highlight(bool enable)

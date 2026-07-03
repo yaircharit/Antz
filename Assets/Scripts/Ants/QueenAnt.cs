@@ -14,11 +14,19 @@ namespace Assets.Scripts
 
         public override string Name { get; set; } = "Queen Ant"; // Name of the queen ant
 
-        protected BaseQueenState _queenCurrentState;
+        protected BaseQueenState _queenCurrentState
+        {
+            get { return base.currentState as BaseQueenState; }
+            set { base.currentState = value; }
+        }
         public override BaseState currentState
         {
-            get => _queenCurrentState;
-            protected set { _queenCurrentState = (BaseQueenState)value;            }
+            get => base.currentState; // delegate to base to preserve non-queen states
+            protected set
+            {
+                base.currentState = value;
+                _queenCurrentState = value as BaseQueenState; // safe cast, null if not a queen state
+            }
         }
 
 
@@ -30,14 +38,14 @@ namespace Assets.Scripts
         protected override void UpdateEffectiveStats(float sizeModifier = 0)
         {
             if (sizeModifier == 0)
-                sizeModifier = genome["Size"].Value ;
+                sizeModifier = Size;
 
             base.UpdateEffectiveStats(sizeModifier * genome["QueenSizeModifier"].Value);
         }
 
         public float GetMatingEnergyCost(Brood b)
         {
-            return (0.1f / genome["BroodHatchTime"].Value * genome["QueenCooldown"].Value) * b.Genome["Size"].Value;
+            return (0.1f / genome["BroodHatchTime"].Value * genome["QueenCooldown"].Value) * b.Size;
         }
 
         // Generates a random float with an approximate normal distribution 
@@ -60,7 +68,7 @@ namespace Assets.Scripts
 
         public void Mate(Ant ant)
         {
-            int numberOfOffspring = (int)(RandomNormalDistribution( genome["OffspringCount"].Value, 2));
+            int numberOfOffspring = (int)(RandomNormalDistribution(genome["OffspringCount"].Value, 2));
 
             for (int i = 0; i < numberOfOffspring; i++)
             {

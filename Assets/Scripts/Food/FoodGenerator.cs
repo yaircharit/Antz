@@ -14,7 +14,7 @@ public class FoodGenerator : MonoBehaviour
 
     [Header("Random Spawn Area")]
     [SerializeField] private Vector2 spawnAreaCenter = Vector2.zero; // Center point for spawn area
-    [SerializeField] private float spawnRadius = 10f; // Distance from center to edge of spawn area
+    [SerializeField] private float spawnRadius = 40f; // Distance from center to edge of spawn area
 
     private GameObject foodParent; // Parent for all spawned food blocks
 
@@ -37,6 +37,13 @@ public class FoodGenerator : MonoBehaviour
         {
             SpawnAppleShape();
         }
+
+        // Spawn aaple where player right clicked
+        if (Input.GetMouseButtonDown(1))
+        {
+            // TODO: get mouse position on mesh
+            SpawnAppleShape();
+        }
     }
 
     public static void SpawnAppleShape()
@@ -45,7 +52,10 @@ public class FoodGenerator : MonoBehaviour
         float randX = Random.Range(Instance.spawnAreaCenter.x - Instance.spawnRadius, Instance.spawnAreaCenter.x + Instance.spawnRadius);
         float randZ = Random.Range(Instance.spawnAreaCenter.y - Instance.spawnRadius, Instance.spawnAreaCenter.y + Instance.spawnRadius);
         Vector3 spawnPos = new(randX, Instance.spawnHeight, randZ);
-
+        SpawnAppleShape(spawnPos);
+    }
+    public static void SpawnAppleShape(Vector3 spawnPos)
+    {
 
         int r = Instance.appleSize / 2;
         // Apple shape: ellipsoid with a slight flattening and a "dimple" for the apple top

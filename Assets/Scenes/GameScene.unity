@@ -275,9 +275,15 @@ MonoBehaviour:
   appleBlockPrefab: {fileID: 947474979183635148, guid: db60231b168fc80438fecf0107f8b385, type: 3}
   appleSize: 7
   blockSpacing: 1
+<<<<<<< HEAD
   spawnHeight: 16
   spawnAreaCenter: {x: 0, y: 0}
   spawnRadius: 16
+=======
+  spawnHeight: 7
+  spawnAreaCenter: {x: 0, y: 0}
+  spawnRadius: 40
+>>>>>>> f215773 (Stable 2D version)
 --- !u!1 &205284890
 GameObject:
   m_ObjectHideFlags: 0

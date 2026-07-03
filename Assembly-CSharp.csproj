@@ -128,8 +128,11 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\Scripts\Interface\AntListItem.cs" />
     <Compile Include="Assets\Scripts\Ants\Brood.cs" />
+<<<<<<< HEAD
     <Compile Include="Assets\Scripts\WorldGeneration\ChunkRenderer.cs" />
     <Compile Include="Assets\Scripts\WorldGeneration\Chuck.cs" />
+=======
+>>>>>>> f215773 (Stable 2D version)
     <Compile Include="Assets\Scripts\SceneManagers\GameManager.cs" />
     <Compile Include="Assets\Scripts\AntStates\ExploreState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
