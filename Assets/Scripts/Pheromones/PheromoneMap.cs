@@ -41,6 +41,7 @@ public class PheromoneMap : MonoBehaviour
 
     public Vector3Int Round(Vector3 worldPos)
     {
+        worldPos.y = Mathf.Floor(worldPos.y); // Round down to the nearest whole number for y-coordinate
         return Vector3Int.RoundToInt(worldPos);
     }
 

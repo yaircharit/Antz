@@ -22,7 +22,6 @@ public class Ant : MovingEntity
             Debug.LogError("No PheromoneMap found in scene!");
         }
         meshRenderer = GetComponentInChildren<MeshRenderer>();
-        meshRenderer.material.color = baseColor;
 
         OnSelected += Select;
         OnDeselected += Deselect;

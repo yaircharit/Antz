@@ -22,7 +22,8 @@ public class AntColony : MonoBehaviour
 >>>>>>> f215773 (Stable 2D version)
     public float NestRadius { get; private set; } = 2f; // Radius around the nest where ants can drop food
 
-    [SerializeField] private Transform AntsContainer;
+    [SerializeField] private Transform _AntsContainer;
+    public Transform AntsContainer { get { return _AntsContainer; } }
 
     public QueenAnt queen { get; private set; }
     public List<Ant> Ants { get; private set; } = new List<Ant>();

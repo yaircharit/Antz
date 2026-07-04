@@ -82,7 +82,7 @@ namespace Assets.Scripts
 
         public Brood SpawnBrood(Genome broodGenome)
         {
-            Brood b = Instantiate(BroodPrefab, transform.position + (UnityEngine.Random.insideUnitSphere + Vector3.up) * genome["Size"].Value, Quaternion.identity); // added position and rotation
+            Brood b = Instantiate(BroodPrefab, transform.position + (UnityEngine.Random.insideUnitSphere + Vector3.up) * Size, Quaternion.identity,Colony.AntsContainer); // added position and rotation
             b.Init(Colony, broodGenome); // changed genome parameter to broodGenome
             return b; // corrected the return statement
         }
