@@ -3,21 +3,18 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    AntColony colony;
-    [SerializeField] public World world;
+    public static AntColony colony { get; private set; }
     [SerializeField] public AntColony ColonyPrefab;
 
     private void Awake()
     {
         Genome.InitializeTraitDefinitions(); // Ensure trait definitions are loaded before creating genomes
+        GameSetup.queenGenome ??= new Genome(); // Initialize the queen genome with the provided data
     }
 
     void Start()
     {
-        world.RenderChunks(Vector3Int.zero); // Render the initial chunk at the start of the game
-
         colony = Instantiate(ColonyPrefab);
-
         var queen = colony.SpawnQueen(GameSetup.queenGenome);
         int startingAntsCount = (int)queen.genome["OffspringCount"].Value;
 

@@ -40,7 +40,7 @@ public class Player : MonoBehaviour
         rb.useGravity = false; // Floating
         rb.constraints = RigidbodyConstraints.FreezeRotation;
         rb.mass = 1f;
-        rb.drag = 2f;
+        rb.linearDamping = 2f;
 
         playerCamera = GetComponentInChildren<Camera>();
         if (playerCamera == null)

@@ -30,7 +30,7 @@ namespace Assets.Scripts
         protected override void UpdateEffectiveStats(float sizeModifier = 0)
         {
             if (sizeModifier == 0)
-                sizeModifier = genome["Size"].Value ;
+                sizeModifier = Size ;
 
             base.UpdateEffectiveStats(sizeModifier * genome["QueenSizeModifier"].Value);
         }
@@ -74,7 +74,7 @@ namespace Assets.Scripts
 
         public Brood SpawnBrood(Genome broodGenome)
         {
-            Brood b = Instantiate(BroodPrefab, transform.position + (UnityEngine.Random.insideUnitSphere + Vector3.up) * genome["Size"].Value, Quaternion.identity); // added position and rotation
+            Brood b = Instantiate(BroodPrefab, transform.position + (UnityEngine.Random.insideUnitSphere + Vector3.up) * Size, Quaternion.identity); // added position and rotation
             b.Init(Colony, broodGenome); // changed genome parameter to broodGenome
             return b; // corrected the return statement
         }

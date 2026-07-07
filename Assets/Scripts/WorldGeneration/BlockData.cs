@@ -9,15 +9,15 @@ public enum BlockSide { Top, Bottom, North, South, East, West };
 
 public static class BlockData // TODO: Consider making this class to a base for Block class
 {
-    public static readonly Vector3[] vertices = new Vector3[8] {
-        new Vector3(0,0,0),// 0         7-----------3
-        new Vector3(0,0,1),// 1        /|          /|          U   E
-        new Vector3(0,1,0),// 2       / |         / |        Y+|  / Z+
-        new Vector3(0,1,1),// 3      6--+--------2  |          | /
-        new Vector3(1,0,0),// 4      |  5--------|--1    X+    |/ 
-        new Vector3(1,0,1),// 5      | /         | /   N <-----+----- S
-        new Vector3(1,1,0),// 6      |/          |/           /|    X-
-        new Vector3(1,1,1),// 7      4-----------0         Z-/ |Y-
+    public static readonly Vector3Int[] vertices = new Vector3Int[8] {
+        new Vector3Int(0,0,0),// 0         7-----------3
+        new Vector3Int(0,0,1),// 1        /|          /|          U   E
+        new Vector3Int(0,1,0),// 2       / |         / |        Y+|  / Z+
+        new Vector3Int(0,1,1),// 3      6--+--------2  |          | /
+        new Vector3Int(1,0,0),// 4      |  5--------|--1    X+    |/ 
+        new Vector3Int(1,0,1),// 5      | /         | /   N <-----+----- S
+        new Vector3Int(1,1,0),// 6      |/          |/           /|    X-
+        new Vector3Int(1,1,1),// 7      4-----------0         Z-/ |Y-
     };                     //                               W  D
 
 
@@ -42,13 +42,13 @@ public static class BlockData // TODO: Consider making this class to a base for 
         new Vector2(0,0)
     };
 
-    public static readonly Vector3[] neighbors = new Vector3[] {
-        new Vector3(0,1,0), // Top
-        new Vector3(0,-1,0),// Bottom
-        new Vector3(0,0,1), // North (Z+)
-        new Vector3(0,0,-1),// South (Z-)
-        new Vector3(1,0,0), // East (X+)
-        new Vector3(-1,0,0) // West (X-)
+    public static readonly Vector3Int[] neighbors = new Vector3Int[] {
+        new Vector3Int(0,1,0), // Top
+        new Vector3Int(0,-1,0),// Bottom
+        new Vector3Int(0,0,1), // North (Z+)
+        new Vector3Int(0,0,-1),// South (Z-)
+        new Vector3Int(1,0,0), // East (X+)
+        new Vector3Int(-1,0,0) // West (X-)
     };
 
 }

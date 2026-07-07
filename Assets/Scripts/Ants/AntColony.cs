@@ -25,8 +25,9 @@ public class AntColony : MonoBehaviour
 
     private void Awake()
     {
-        NestPos = Vector3.up * Chunk.floorHeight;
+        NestPos = Vector3.up * Chunk.floorHeight; //TODO: should be more dynamic, maybe based on terrain height or a specific point in the world
         NestRadius = NestSize / 2f;
+        transform.position = NestPos; // Position the colony at the nest position
     }
 
 
@@ -55,9 +56,9 @@ public class AntColony : MonoBehaviour
         antsListWindow.AddAnt(ant);
     }
 
-    public bool IsInNest(Vector3 position, float size =1)
+    public bool IsInNest(Vector3 position)
     {
-        return Vector3.Distance(position, NestPos) <= NestRadius - size/2;
+        return Vector3.Distance(position, NestPos) <= NestRadius;
     }
 
     void OnDrawGizmosSelected()

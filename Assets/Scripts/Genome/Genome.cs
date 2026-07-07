@@ -21,10 +21,7 @@ public class Genome
     /// </summary>
     public static void InitializeTraitDefinitions()
     {
-        if (TraitDefinitions == null)
-        {
-            TraitDefinitions = Resources.LoadAll<GenomeTraitDefinition>("GenomeTraits");
-        }
+        TraitDefinitions ??= Resources.LoadAll<GenomeTraitDefinition>("GenomeTraits");
     }
 
     public Genome()

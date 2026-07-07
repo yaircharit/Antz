@@ -18,7 +18,7 @@ public abstract class MovingEntity : MonoBehaviour
     public float CurrentEnergy { get; protected set; } // Current energy of the ant, can be used for energy management
 
     public Genome genome { get; protected set; } // Genome of the ant, can be used for genetic algorithms or traits
-
+    protected float Size => genome["Size"].Value; // Size of the ant, can be used for scaling or other size-related calculations
     protected static readonly float BaseHealth = 100f;
     protected static readonly float BaseEnergy = 100f;
     public float EffectiveSpeed;
@@ -103,7 +103,7 @@ public abstract class MovingEntity : MonoBehaviour
     protected virtual void UpdateEffectiveStats(float sizeModifier = 0)
     {
         if (sizeModifier == 0)
-            sizeModifier = genome["Size"].Value;
+            sizeModifier = Size;
 
         transform.localScale = Vector3.one * sizeModifier; // Set the scale of the ant based on size trait
         EffectiveSpeed = genome["Speed"].Value / sizeModifier;
@@ -332,7 +332,7 @@ public abstract class MovingEntity : MonoBehaviour
     public IEnumerator FlashColor(Color color, float duration)
     {
         if (flashingCoroutine != null)
-            yield return null;
+            yield break; // Exit if already flashing
 
         Color prevColor = meshRenderer.material.color;
         meshRenderer.material.color = color;

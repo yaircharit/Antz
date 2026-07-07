@@ -112,7 +112,7 @@ public class Ant : MovingEntity
 
     public bool IsInNest()
     {
-        return Colony != null && Colony.IsInNest(transform.position, genome["Size"].Value);
+        return Colony != null && Colony.IsInNest(transform.position);
     }
 
     public void DropPheromone(PheromoneType type)

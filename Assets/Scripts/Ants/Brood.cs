@@ -41,7 +41,8 @@ public class Brood : MonoBehaviour
         // Spawn the child ant via colony
         if (Colony != null && Genome != null)
         {
-            var a = Colony.SpawnAnt(Genome);
+            var a = Colony.SpawnAnt(Genome); 
+            a.transform.position = transform.position;
             Debug.Log($"{a} was born!");
         }
         Destroy(gameObject);

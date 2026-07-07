@@ -13,7 +13,7 @@ public class Chunk
 
     public Vector3Int chunkCoord;
     public Block[] blocks; // Flattened 1D array
-    public bool isDirty;
+    public bool isDirty;    // Should the chunk be re-rendered?
     public bool hasMesh;
     private ChunkRenderer renderer;
 
@@ -41,11 +41,11 @@ public class Chunk
     {
         chunkCoord = coord;
         // Allocate using precomputed volume (1 << (3*bitcount))
-        blocks = new Block[volume];
+        blocks = new Block[volume]; //TODO: use list or somthing. wasting memory
         GenerateBlocks();
     }
 
-    // Convert x,y,z to 1D index using bit shifts (faster when chunkSize is power of two)
+    // Convert x,y,z to 1D index 
     public int GetIndex(int x, int y, int z)
     {
         // x occupies lower chunkBitCount bits,
@@ -53,23 +53,53 @@ public class Chunk
         return x | (y << chunkBitCount) | (z << (chunkBitCount * 2));
     }
 
-    // World to Chunk Coord (uses arithmetic right shift -> floor division for powers of two)
-    public static Vector3Int WorldToChunkCoord(Vector3Int worldPos)
+    // Get block with coordinates relative to chunk
+    public Block GetBlock(int x, int y, int z)
+    {
+        return blocks[GetIndex(x, y, z)];
+    }
+    public Block GetBlock(Vector3Int pos)
+    {
+        return GetBlock(pos.x, pos.y, pos.z);
+    }
+
+    // World to Chunk Coord
+    public static Vector3Int WorldToChunkCoord(int x, int y, int z)
     {
         return new Vector3Int(
-            worldPos.x >> chunkBitCount,
-            worldPos.y >> chunkBitCount,
-            worldPos.z >> chunkBitCount
+            x >> chunkBitCount,
+            y >> chunkBitCount,
+            z >> chunkBitCount
         );
     }
 
-    // World to Local Tile Coord (bitwise modulo)
-    public static Vector3Int WorldToLocalCoord(Vector3Int worldPos)
+    // World to Chunk Coord
+    public static Vector3Int WorldToChunkCoord(Vector3Int worldPos)
+    {
+        return WorldToChunkCoord(worldPos.x, worldPos.y, worldPos.z);
+    }
+
+    // World to Local Tile Coord (relative to chunk)
+    public static Vector3Int WorldToLocalCoord(int x, int y, int z)
     {
         return new Vector3Int(
-            worldPos.x & mask,
-            worldPos.y & mask,
-            worldPos.z & mask
+            x & mask,
+            y & mask,
+            z & mask
+        );
+    }
+    // World to Local Tile Coord (relative to chunk)
+    public static Vector3Int WorldToLocalCoord(Vector3Int worldPos)
+    {
+        return WorldToLocalCoord(worldPos.x, worldPos.y, worldPos.z);
+    }
+
+    public Vector3Int GetGlobalCoords(int x, int y, int z)
+    {
+        return new Vector3Int(
+            x + (chunkCoord.x * chunkSize),
+            y + (chunkCoord.y * chunkSize),
+            z + (chunkCoord.z * chunkSize)
         );
     }
 
@@ -79,18 +109,19 @@ public class Chunk
         // Simple example: fill bottom half with solid blocks, top half with air
         for (int x = 0; x < chunkSize; x++)
         {
-            for (int y = 0; y < floorHeight; y++)
+            for (int z = 0; z < chunkSize; z++)
             {
-                for (int z = 0; z < chunkSize; z++)
+                // Set solid blocks up to floorHeight, air above (set by default)
+                for (int y = 0; y < floorHeight; y++)
                 {
                     int index = GetIndex(x, y, z);
                     // Ensure the struct is updated to represent a solid block
                     blocks[index].id = 1; // Solid block (e.g., dirt)
-                    blocks[index].flags = 1; // Set IsSolid bit
+                    blocks[index].IsSolid = true; // Set IsSolid bit
                 }
             }
         }
-        isDirty = true;
+        isDirty = false;
     }
 
     public void Render()

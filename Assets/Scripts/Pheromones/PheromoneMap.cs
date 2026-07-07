@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -41,7 +42,8 @@ public class PheromoneMap : MonoBehaviour
 
     public Vector3Int Round(Vector3 worldPos)
     {
-        return Vector3Int.FloorToInt(worldPos);
+        worldPos.y = MathF.Round(worldPos.y); // Round the y-coordinate to the nearest integer
+        return Vector3Int.RoundToInt(worldPos);
     }
 
     public void AddPheromone(Vector3 worldPos, float amount, PheromoneType type)

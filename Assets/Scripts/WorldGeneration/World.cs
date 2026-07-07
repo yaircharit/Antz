@@ -12,6 +12,9 @@ public class World : MonoBehaviour
 
     [SerializeField] private int renderDistance = 5;
 
+    // TODO: Most funcs and vars should be static?
+
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -22,6 +25,7 @@ public class World : MonoBehaviour
         {
             Instance = this;
             blockDefinitions = Resources.LoadAll<BlockDefinition>("Blocks");
+            RenderChunks(Vector3Int.zero); // Render the initial chunk at the start of the game
         }
     }
 
@@ -67,5 +71,15 @@ public class World : MonoBehaviour
                 RenderChunk(chunkCoord);
             }
         }
+    }
+
+    public Block GetBlock(int x, int y, int z)
+    {
+        return GetChunk(Chunk.WorldToChunkCoord(x,y,z))
+        .GetBlock(Chunk.WorldToLocalCoord(x,y,z));
+    }
+    public Block GetBlock(Vector3Int pos)
+    {
+        return GetBlock(pos.x,pos.y,pos.z);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -24,8 +24,8 @@ namespace Assets.Scripts.WorldGeneration
             meshFilter = GetComponent<MeshFilter>();
             meshCollider = GetComponent<MeshCollider>();
             meshRenderer = GetComponent<MeshRenderer>();
-            
-            meshRenderer.materials = World.Instance.blockDefinitions.Select((def)=>def.material).ToArray();
+
+            meshRenderer.materials = World.Instance.blockDefinitions.Select((def) => def.material).ToArray();
         }
 
         /// <summary>
@@ -86,26 +86,26 @@ namespace Assets.Scripts.WorldGeneration
         /// </summary>
         private bool ShouldRenderFace(int x, int y, int z, int faceIndex)
         {
-            Vector3 neighborOffset = BlockData.neighbors[faceIndex];
-            int neighborX = x + (int)neighborOffset.x;
-            int neighborY = y + (int)neighborOffset.y;
-            int neighborZ = z + (int)neighborOffset.z;
+            Vector3Int neighborOffset = BlockData.neighbors[faceIndex];
+            int neighborX = x + neighborOffset.x;
+            int neighborY = y + neighborOffset.y;
+            int neighborZ = z + neighborOffset.z;
 
-            // Check bounds
+            if (neighborY < 0) return false; // Don't render bottom face if below chunk
+            if (neighborY >= Chunk.chunkSize) return true; // Always render top face if above chunk
+
             if (neighborX < 0 || neighborX >= Chunk.chunkSize ||
-                neighborY < 0 || neighborY >= Chunk.chunkSize ||
                 neighborZ < 0 || neighborZ >= Chunk.chunkSize)
             {
-                // Edge of chunk - render face (would connect to adjacent chunks in full implementation)
-                return true;
+                // If the neighbor is outside the chunk, check the world directly
+                Vector3Int worldPosition = chunk.GetGlobalCoords(x, y, z) + neighborOffset;
+                return !World.Instance.GetBlock(worldPosition).IsSolid; //return true if neighbor is NOT solid
             }
-
-            // Get neighbor block
-            int neighborIndex = chunk.GetIndex(neighborX, neighborY, neighborZ);
-            Block neighborBlock = chunk.blocks[neighborIndex];
-
-            // Render if neighbor is air or not solid
-            return neighborBlock.id == 0 || !neighborBlock.IsSolid;
+            else
+            {
+                // neighbor is in the same chunk, check the chunk's block data
+                return !chunk.GetBlock(neighborX, neighborY, neighborZ).IsSolid; //return true if neighbor is NOT solid
+            }
         }
 
         /// <summary>
