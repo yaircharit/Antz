@@ -3,7 +3,16 @@ using UnityEngine;
 
 public abstract class MovingEntity : MonoBehaviour
 {
-    public virtual string Name { get; set; } = "MovingEntity"; // Name of the ant, can be used for identification
+    private string _name = "MovingEntity";
+
+    public virtual string Name
+    {
+        get => _name;
+        set => _name = value;
+    }
+
+    protected virtual string DefaultName => "MovingEntity";
+
     public int ID { get; protected set; } = -1; // Unique ID for the ant, can be used for identification
     public static int Count { get; protected set; } = 0; // Static counter to keep track of the number of ants
 
@@ -74,7 +83,7 @@ public abstract class MovingEntity : MonoBehaviour
     public virtual void Init(Genome genes)
     {
         ID = Count++; // Increment the static ant count
-        Name = $"{Name}_{ID}"; // Set the name based on the ID
+        Name = $"{DefaultName}_{ID}"; // Set the name based on the ID
 
         OnDamageTaken += (_) =>
         {
@@ -121,7 +130,7 @@ public abstract class MovingEntity : MonoBehaviour
         currentState?.Enter();
     }
 
-    public void MoveTowards(Vector3 targetDirection, float speed)
+    public virtual void MoveTowards(Vector3 targetDirection, float speed)
     {
         if (targetDirection == Vector3.zero) targetDirection = Vector3.forward; // Avoid division by zero or invalid movement
         transform.forward = targetDirection;

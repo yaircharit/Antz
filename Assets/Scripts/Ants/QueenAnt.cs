@@ -12,8 +12,7 @@ namespace Assets.Scripts
     {
         [SerializeField] private Brood BroodPrefab; // Prefab for the brood
 
-        public override string Name { get; set; } = "Queen Ant"; // Name of the queen ant
-
+        protected override string DefaultName => "Queen Ant";
         protected BaseQueenState _queenCurrentState;
         public override BaseState currentState
         {
@@ -67,6 +66,7 @@ namespace Assets.Scripts
                 Genome childGenome = Genome.Cross(this.genome, ant.genome);
                 childGenome.Mutate();
                 Brood b = SpawnBrood(childGenome);
+                b.transform.parent = transform.parent; // Set the brood's parent to the queen for organization
                 ReduceEnergy(GetMatingEnergyCost(b) * ant.GetEnergyCost()); // Mating energy cost
             }
             Debug.Log($"{numberOfOffspring} broods created!");

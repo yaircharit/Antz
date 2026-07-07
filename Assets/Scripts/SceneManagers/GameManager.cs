@@ -12,18 +12,11 @@ public class GameManager : MonoBehaviour
         GameSetup.queenGenome ??= new Genome(); // Initialize the queen genome with the provided data
     }
 
-    private void Awake()
-    {
-        Genome.InitializeTraitDefinitions(); // Ensure trait definitions are loaded before creating genomes
-        GameSetup.queenGenome ??= new Genome(); // Create the queen genome at startup
-    }
-
     void Start()
     {
         colony = Instantiate(ColonyPrefab);
         var queen = colony.SpawnQueen(GameSetup.queenGenome);
         int startingAntsCount = (int)queen.genome["OffspringCount"].Value;
-
 
         for (int i = 0; i < startingAntsCount; i++)
         {

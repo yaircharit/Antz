@@ -36,7 +36,6 @@ public class FoodGenerator : MonoBehaviour
         foodParent = new GameObject("Apple");
         foodParent.transform.SetParent(transform);
         FoodBlock.count = 0;
-        spawnCenter = GameManager.colony.NestPos; // Center the spawn area around the colony's nest position
     }
 
     private void Update()
@@ -51,6 +50,10 @@ public class FoodGenerator : MonoBehaviour
         }
     }
 
+    public static void SetCenter(Vector3 center)
+    {
+        Instance.spawnCenter = center;
+    }
     private void SpawnAppleAtMouseClick()
     {
         Camera cam = Camera.main;

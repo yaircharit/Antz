@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Ant : MovingEntity
 {
-    public override string Name { get; set; } = "Ant"; // Name of the ant, can be used for identification
+    protected override string DefaultName => "Ant";
     public new static int Count { get; protected set; } = 0; // Static counter to keep track of the number of ants
 
     public static Ant SelectedAnt { get; internal set; } = null;
@@ -22,6 +22,7 @@ public class Ant : MovingEntity
             Debug.LogError("No PheromoneMap found in scene!");
         }
         meshRenderer = GetComponentInChildren<MeshRenderer>();
+        meshRenderer.material.color = baseColor; // Default color for ants
 
         OnSelected += Select;
         OnDeselected += Deselect;
@@ -46,22 +47,14 @@ public class Ant : MovingEntity
         ChangeState(new ExploreState(this, PheromoneType.Home));
     }
 
-<<<<<<< HEAD
-    protected void FixedUpdate()
-=======
     protected virtual void FixedUpdate()
->>>>>>> f215773 (Stable 2D version)
     {
         // TODO: should it be every FixedUpdate?
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
             ChangeState(new ExploreState(this));
-<<<<<<< HEAD
-            transform.SetPositionAndRotation(Colony.NestPos + Vector3.up * Chunk.chunkSize, Quaternion.Euler(0, 0, 0));
-=======
             transform.SetPositionAndRotation(Colony.NestPos + Vector3.up, Quaternion.Euler(0, 0, 0));
->>>>>>> f215773 (Stable 2D version)
             ResetPheromoneDepositRate();
         }
 
