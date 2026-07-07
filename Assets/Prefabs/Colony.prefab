@@ -754,7 +754,7 @@ MonoBehaviour:
   AntPrefab: {fileID: 5779244861228903171, guid: a1f6dc5680a576848898f589483a1f0f, type: 3}
   QueenAntPrefab: {fileID: -2125657786318233142, guid: 9292bf3d45660234e81ec28e013280ab, type: 3}
   NestSize: 2
-  AntsContainer: {fileID: 2396173987763848551}
+  _AntsContainer: {fileID: 2396173987763848551}
   antsListWindow: {fileID: 695781587640198375}
   foodScoreText: {fileID: 1006575401854944227}
   foodScore: 0

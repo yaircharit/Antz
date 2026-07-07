@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using UnityEngine;
 
 public class Ant : MovingEntity
@@ -21,13 +22,12 @@ public class Ant : MovingEntity
             Debug.LogError("No PheromoneMap found in scene!");
         }
         meshRenderer = GetComponentInChildren<MeshRenderer>();
-        meshRenderer.material.color = baseColor;
 
         OnSelected += Select;
         OnDeselected += Deselect;
     }
 
-    public void Init(AntColony antColony, Genome genome)
+    public virtual void Init(AntColony antColony, Genome genome)
     {
         ID = Count++; // Increment the static ant count
 
@@ -46,14 +46,22 @@ public class Ant : MovingEntity
         ChangeState(new ExploreState(this, PheromoneType.Home));
     }
 
+<<<<<<< HEAD
     protected void FixedUpdate()
+=======
+    protected virtual void FixedUpdate()
+>>>>>>> f215773 (Stable 2D version)
     {
         // TODO: should it be every FixedUpdate?
         if (transform.position.y < -10f)
         {
             // Reset ant position if it falls below a certain height
             ChangeState(new ExploreState(this));
+<<<<<<< HEAD
             transform.SetPositionAndRotation(Colony.NestPos + Vector3.up * Chunk.chunkSize, Quaternion.Euler(0, 0, 0));
+=======
+            transform.SetPositionAndRotation(Colony.NestPos + Vector3.up, Quaternion.Euler(0, 0, 0));
+>>>>>>> f215773 (Stable 2D version)
             ResetPheromoneDepositRate();
         }
 
@@ -99,7 +107,6 @@ public class Ant : MovingEntity
         {
             targetDirection = GetPheromoneDirections(type);
         }
-        targetDirection.y = 0; // Keep movement in the horizontal plane
         MoveTowards(targetDirection, CurrentSpeed);
 
         if (Time.time - lastStuckTime > 1f)
@@ -108,6 +115,16 @@ public class Ant : MovingEntity
             lastStuckTime = Time.time; // Update last stuck time
             lastPosition = transform.position; // Update last position
         }
+    }
+
+    public override void MoveTowards(Vector3 direction, float speed)
+    {
+
+        // Finally move using the adjusted direction
+        base.MoveTowards(direction, speed);
+
+        // Energy consumption
+        ReduceEnergy();
     }
 
     public bool IsInNest()

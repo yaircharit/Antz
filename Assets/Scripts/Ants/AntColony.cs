@@ -11,10 +11,19 @@ public class AntColony : MonoBehaviour
 
     public float NestSize = 2f; // Size of the nest area, can be set in the inspector or dynamically
 
+<<<<<<< HEAD
     public Vector3 NestPos { get; private set; }
+=======
+    public Vector3Int NestPos
+    {
+        get { return Vector3Int.RoundToInt(transform.position); }
+        set { transform.position = value; }
+    }
+>>>>>>> f215773 (Stable 2D version)
     public float NestRadius { get; private set; } = 2f; // Radius around the nest where ants can drop food
 
-    [SerializeField] private Transform AntsContainer;
+    [SerializeField] private Transform _AntsContainer;
+    public Transform AntsContainer { get { return _AntsContainer; } }
 
     public QueenAnt queen { get; private set; }
     public List<Ant> Ants { get; private set; } = new List<Ant>();
